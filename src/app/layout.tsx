@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AutoHreflang from "@/components/AutoHreflang";
 import AutoMeta from "@/components/AutoMeta";
+import GlobalSchema from "@/components/GlobalSchema";
+import Script from "next/script";
+import Popunder from "@/components/Popunder";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +42,17 @@ export default function RootLayout({
       >
         <AutoHreflang />
         <AutoMeta />
+        <GlobalSchema />
+
+        {/* Popunder Ad Script (Delayed) */}
+        <Popunder />
+
+        {/* Social Bar Ad Script */}
+        <Script
+          src="https://pl28297726.effectivegatecpm.com/c2/e5/20/c2e520ceb5ab45297ca5cd996139f133.js"
+          strategy="afterInteractive"
+        />
+
         {children}
       </body>
     </html>

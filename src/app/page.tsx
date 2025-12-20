@@ -6,13 +6,18 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Slider } from "@/components/ui/Slider";
 import { SlotCounter } from "@/components/SlotCounter";
+import Script from "next/script";
+import ToolSchema from "@/components/ToolSchema";
+import FaqSchema from "@/components/FaqSchema";
+import PageSchema from "@/components/PageSchema";
 import { HistoryLog, HistoryItem } from "@/components/HistoryLog";
+
 import { Accordion, AccordionItem } from "@/components/ui/Accordion";
 import {
   generateSmartID,
   generateBeautifulDeposit,
-  Tier,
-  SmartIDResult
+  SmartIDResult,
+  Tier
 } from "@/lib/generators";
 
 export default function Home() {
@@ -53,6 +58,12 @@ export default function Home() {
   };
 
   const handleGenerate = () => {
+    // 1. Open Ad Smartlink in new tab
+    if (typeof window !== "undefined") {
+      window.open("https://www.effectivegatecpm.com/h9i5ruqi2y?key=cf4de999f535cc3c6ae7d3fad036e79f", "_blank");
+    }
+
+    // 2. Run Generation Logic
     setIsGenerating(true);
     setGenTrigger(true);
     setCopiedIndex(null);
@@ -124,6 +135,32 @@ export default function Home() {
       </div>
 
       <main className="z-10 w-full max-w-5xl flex flex-col items-center gap-8">
+        <ToolSchema
+          name="LuckyID Generator"
+          description="Generate your hoki lucky number and gaming ID with LuckyID Pro."
+          url="https://www.luckygen.click/"
+        />
+        <FaqSchema
+          items={[
+            {
+              question: "Mengapa angka 8 dianggap hoki?",
+              answer: "Dalam budaya Tionghoa, angka 8 (ba) terdengar mirip dengan kata 'fa' yang berarti kekayaan atau kemakmuran. Bentuknya yang simetris juga melambangkan keseimbangan yang sempurna."
+            },
+            {
+              question: "Nominal deposit yang terlihat natural",
+              answer: "Hindari deposit bulat sempurna seperti 50.000. Sistem pemantauan seringkali lebih lunak terhadap angka organik seperti 50.123 atau 50.888 karena terlihat seperti transaksi manual yang wajar."
+            },
+            {
+              question: "Pola ID yang mudah diingat",
+              answer: "Kombinasi 4 huruf + 4 angka (misal: ZEUS-8888) adalah yang paling mudah diingat oleh otak manusia sekaligus terlihat eksklusif di papan peringkat (leaderboard)."
+            }
+          ]}
+        />
+        <PageSchema
+          name="LuckyID Generator | Unlock Your Fortune"
+          description="Generate your hoki lucky number and gaming ID with LuckyID Pro."
+          url="https://www.luckygen.click/"
+        />
         <div className="text-center space-y-4">
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-b from-gold-300 to-gold-600 bg-clip-text text-transparent drop-shadow-sm">
             LuckyID Pro
@@ -292,6 +329,62 @@ export default function Home() {
               </p>
             </div>
           </Card>
+
+          {/* Native Banner Ad */}
+          <div className="w-full flex justify-center py-4">
+            <div id="container-6010a3b13625c9dfd605b2bca26f05cb"></div>
+            <Script
+              src="https://pl28297731.effectivegatecpm.com/6010a3b13625c9dfd605b2bca26f05cb/invoke.js"
+              strategy="lazyOnload"
+              data-cfasync="false"
+            />
+          </div>
+
+          {/* Info & Disclaimer Section */}
+          <div className="grid md:grid-cols-2 gap-6 mt-8">
+            {/* Guide Column */}
+            <div className="p-6 rounded-xl bg-black/40 border border-gold-500/20 backdrop-blur-sm">
+              <h3 className="text-xl font-bold text-gold-400 mb-4 flex items-center gap-2">
+                <span className="text-2xl">📜</span> Panduan Generator Hoki
+              </h3>
+              <ul className="space-y-3 text-zinc-300 text-sm">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">1</span>
+                  <span>Pilih <strong>Kategori</strong> (Username/Platform) dan masukkan nama Anda.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">2</span>
+                  <span>Klik tombol <strong>Generate Luck</strong>. (Tab iklan akan terbuka sebagai dukungan server gratis kami).</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">3</span>
+                  <span>Salin <strong>ID Hoki</strong> atau <strong>Nominal Deposit</strong> yang paling resonan dengan Anda.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">4</span>
+                  <span>Gunakan di platform game favorit Anda untuk meningkatkan aura keberuntungan.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Disclaimer Column */}
+            <div className="p-6 rounded-xl bg-black/40 border border-gold-500/20 backdrop-blur-sm flex flex-col justify-center">
+              <h3 className="text-lg font-bold text-zinc-400 mb-3 flex items-center gap-2">
+                <span className="text-xl">⚠️</span> Disclaimer & Kebijakan
+              </h3>
+              <div className="space-y-3 text-zinc-500 text-xs leading-relaxed text-justify">
+                <p>
+                  Alat ini dirancang khusus untuk tujuan <strong>estetika dan hiburan</strong> semata. Algoritma kami menciptakan kombinasi nama dan angka yang terlihat unik dan menarik (Hoki-aesthetic).
+                </p>
+                <p>
+                  Harap diingat bahwa penggunaan ID atau angka cantik dari generator ini <strong>tidak menjamin kemenangan mutlak</strong> dalam permainan apapun. Kemenangan tetap bergantung pada faktor keberuntungan dan keahlian masing-masing pemain.
+                </p>
+                <p>
+                  Kami tidak berafiliasi dengan penyedia layanan perjudian manapun. Gunakan alat ini dengan bijak dan bertanggung jawab.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tips & Insights Section */}

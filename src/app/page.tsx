@@ -22,13 +22,13 @@ export default function Home() {
   const [budgetLimit, setBudgetLimit] = useState(500000); // Max budget
 
   // Result State
-  const [generatedID, setGeneratedID] = useState<SmartIDResult | null>(null);
+  const [generatedIDs, setGeneratedIDs] = useState<SmartIDResult[]>([]);
   const [depositAmount, setDepositAmount] = useState<number | null>(null);
 
   // UI State
   const [isGenerating, setIsGenerating] = useState(false);
   const [genTrigger, setGenTrigger] = useState(false);
-  const [copiedID, setCopiedID] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedAmount, setCopiedAmount] = useState(false);
 
   // History State
@@ -55,14 +55,23 @@ export default function Home() {
   const handleGenerate = () => {
     setIsGenerating(true);
     setGenTrigger(true);
-    setCopiedID(false);
+    setCopiedIndex(null);
     setCopiedAmount(false);
+    setGeneratedIDs([]); // Clear previous
 
-    // Calculate luck immediately
-    const idResult = generateSmartID(platform, username);
+    // Calculate luck and generate 3 options
+    const results = [
+      generateSmartID(platform, username),
+      generateSmartID(platform, username),
+      generateSmartID(platform, username)
+    ];
+    // Sort by tier rarity descending for better UX
+    const tierOrder = { "LEGENDARY": 4, "MYTHIC": 3, "VIP": 2, "SUPER": 1, "COMMON": 0 };
+    results.sort((a, b) => tierOrder[b.tier] - tierOrder[a.tier]);
+
     const amountResult = generateBeautifulDeposit(20000, budgetLimit);
 
-    setGeneratedID(idResult);
+    setGeneratedIDs(results);
     setDepositAmount(amountResult);
 
     // Reset loading state after animation duration
@@ -70,23 +79,23 @@ export default function Home() {
       setIsGenerating(false);
       setGenTrigger(false);
 
-      // Save to history after generation is "complete" (visual effect)
+      // Save best result to history
       saveHistory({
-        id: idResult.id,
+        id: results[0].id, // Save the highest tier one
         deposit: amountResult,
-        tier: idResult.tier,
+        tier: results[0].tier,
         timestamp: Date.now()
       });
-    }, 2500); // Slightly longer for dramatic effect
+    }, 2500);
   };
 
-  const copyToClipboard = async (text: string, type: 'id' | 'amount') => {
+  const copyToClipboard = async (text: string, type: 'id' | 'amount', index?: number) => {
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
-      if (type === 'id') {
-        setCopiedID(true);
-        setTimeout(() => setCopiedID(false), 2000);
+      if (type === 'id' && index !== undefined) {
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
       } else {
         setCopiedAmount(true);
         setTimeout(() => setCopiedAmount(false), 2000);
@@ -180,57 +189,72 @@ export default function Home() {
           {/* Results Section */}
           <Card title="Generation Result" className="min-h-[400px] flex flex-col relative">
             {/* Luck Meter Overlay */}
-            {(generatedID || isGenerating) && (
+            {(generatedIDs.length > 0 || isGenerating) && (
               <div className="absolute top-4 right-4 flex flex-col items-end">
-                <div className="text-xs text-gold-400/60 uppercase tracking-wider mb-1">Luck Score</div>
+                <div className="text-xs text-gold-400/60 uppercase tracking-wider mb-1">Max Luck Score</div>
                 <div className="text-2xl font-bold text-white flex items-baseline gap-1">
                   {isGenerating ? (
                     <span className="animate-pulse">--</span>
                   ) : (
-                    <span className={generatedID?.luckScore && generatedID.luckScore > 90 ? "text-red-500" : "text-gold-300"}>
-                      {generatedID?.luckScore}%
+                    <span className={generatedIDs[0]?.luckScore > 90 ? "text-red-500" : "text-gold-300"}>
+                      {generatedIDs[0]?.luckScore}%
                     </span>
                   )}
                 </div>
               </div>
             )}
 
-            <div className="flex-1 flex flex-col justify-center items-center text-center space-y-10 py-8">
+            <div className="flex-1 flex flex-col justify-center items-center text-center space-y-10 py-8 w-full">
 
-              {/* Generated ID Block */}
-              <div className="space-y-3 group relative w-full">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <h3 className="text-sm font-medium text-gold-400/70 uppercase tracking-wider">
-                    Smart ID
-                  </h3>
-                  {!isGenerating && generatedID?.tier && (
-                    <span className={`px-2 py-0.5 rounded text-[10px] tracking-wider uppercase ${getTierBadgeColor(generatedID.tier)}`}>
-                      {generatedID.tier}
-                    </span>
-                  )}
-                </div>
+              {/* Generated IDs Block */}
+              <div className="space-y-4 w-full">
+                <h3 className="text-sm font-medium text-gold-400/70 uppercase tracking-wider mb-4">
+                  Choose Your Identity
+                </h3>
 
-                <div
-                  className="text-3xl md:text-4xl font-mono font-bold text-gold-300 tracking-widest break-all drop-shadow-[0_0_10px_rgba(251,191,36,0.5)] cursor-pointer hover:text-gold-100 transition-colors"
-                  onClick={() => generatedID && copyToClipboard(generatedID.id, 'id')}
-                  title="Click to copy"
-                >
-                  <SlotCounter
-                    value={generatedID?.id || "----"}
-                    trigger={genTrigger}
-                    duration={2000}
-                  />
-                </div>
+                {isGenerating || generatedIDs.length === 0 ? (
+                  // Placeholder / Loading State
+                  <div className="h-[200px] flex items-center justify-center">
+                    <div className="text-3xl md:text-4xl font-mono font-bold text-gold-300/50 tracking-widest">
+                      <SlotCounter
+                        value="----"
+                        trigger={genTrigger}
+                        duration={2000}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // 3 Result Options
+                  <div className="flex flex-col gap-3 px-4">
+                    {generatedIDs.map((result, idx) => (
+                      <div
+                        key={idx}
+                        className="group relative w-full p-4 rounded-lg bg-black/40 border border-white/5 hover:border-gold-500/30 hover:bg-gold-500/5 transition-all cursor-pointer flex items-center justify-between"
+                        onClick={() => copyToClipboard(result.id, 'id', idx)}
+                      >
+                        <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] tracking-wider uppercase ${getTierBadgeColor(result.tier)}`}>
+                              {result.tier}
+                            </span>
+                            <span className="text-xs text-emerald-400">{result.uniqueRate}% Unique</span>
+                          </div>
+                          <span className="text-xl md:text-2xl font-mono font-bold text-gold-100 tracking-wide group-hover:text-gold-400 transition-colors">
+                            {result.id}
+                          </span>
+                        </div>
 
-                {/* Unique Rate Indicator */}
-                {!isGenerating && generatedID && (
-                  <div className="flex justify-center gap-4 text-xs mt-2">
-                    <span className="text-zinc-500">Unique Rate: <span className="text-emerald-400">{generatedID.uniqueRate}%</span></span>
-                    <span className="text-zinc-500">Tags: <span className="text-gold-500/60">{generatedID.tags.join(", ")}</span></span>
+                        <div className="text-gold-500/50 group-hover:text-gold-400">
+                          {copiedIndex === idx ? (
+                            <span className="text-xs text-emerald-400 font-bold animate-fade-in">COPIED!</span>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
-
-                {copiedID && <span className="absolute right-0 top-0 text-xs text-emerald-400 animate-fade-in bg-black/50 px-2 py-1 rounded">Copied!</span>}
               </div>
 
               <div className="w-2/3 h-px bg-gradient-to-r from-transparent via-gold-600/20 to-transparent" />

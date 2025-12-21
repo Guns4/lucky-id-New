@@ -329,16 +329,17 @@ export default function Home() {
               </p>
             </div>
           </Card>
+        </div>
 
-          {/* Native Banner Ad */}
-          <div className="w-full flex justify-center py-4">
-            <div id="container-6010a3b13625c9dfd605b2bca26f05cb"></div>
-            <Script
-              src="https://pl28297731.effectivegatecpm.com/6010a3b13625c9dfd605b2bca26f05cb/invoke.js"
-              strategy="lazyOnload"
-              data-cfasync="false"
-            />
-          </div>
+        {/* Native Banner Ad */}
+        <div className="w-full flex justify-center py-4">
+          <div id="container-6010a3b13625c9dfd605b2bca26f05cb"></div>
+          <Script
+            src="https://pl28297731.effectivegatecpm.com/6010a3b13625c9dfd605b2bca26f05cb/invoke.js"
+            strategy="lazyOnload"
+            data-cfasync="false"
+          />
+        </div>
 
         {/* Tips & Insights Section */}
         <div className="w-full max-w-4xl space-y-8 pt-8 animate-fade-in-up">

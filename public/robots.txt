@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://luckygen.click/sitemap.xml
+Sitemap: https://www.luckygen.click/sitemap.xml

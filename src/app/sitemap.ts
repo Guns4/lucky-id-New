@@ -2,49 +2,62 @@ import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://www.luckygen.click";
+  const lastModified = "2025-01-01";
 
   return [
     {
       url: `${baseUrl}/`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "daily",
       priority: 1.0,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/`,
+          id: `${baseUrl}/id`,
+        },
+      },
     },
     {
       url: `${baseUrl}/id`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "daily",
-      priority: 0.9,
+      priority: 0.95,
+      alternates: {
+        languages: {
+          en: `${baseUrl}/`,
+          id: `${baseUrl}/id`,
+        },
+      },
     },
     {
       url: `${baseUrl}/lucky-amount-generator`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${baseUrl}/about-us`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/contact`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "yearly",
-      priority: 0.7,
+      priority: 0.6,
     },
     {
       url: `${baseUrl}/privacy-policy`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "yearly",
-      priority: 0.7,
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/terms-of-service`,
-      lastModified: new Date(),
+      lastModified,
       changeFrequency: "yearly",
-      priority: 0.7,
+      priority: 0.5,
     },
   ];
 }

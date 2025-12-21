@@ -340,53 +340,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Info & Disclaimer Section */}
-          <div className="grid md:grid-cols-2 gap-6 mt-8">
-            {/* Guide Column */}
-            <div className="p-6 rounded-xl bg-black/40 border border-gold-500/20 backdrop-blur-sm">
-              <h3 className="text-xl font-bold text-gold-400 mb-4 flex items-center gap-2">
-                <span className="text-2xl">📜</span> Panduan Generator Hoki
-              </h3>
-              <ul className="space-y-3 text-zinc-300 text-sm">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">1</span>
-                  <span>Pilih <strong>Kategori</strong> (Username/Platform) dan masukkan nama Anda.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">2</span>
-                  <span>Klik tombol <strong>Generate Luck</strong>. (Tab iklan akan terbuka sebagai dukungan server gratis kami).</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">3</span>
-                  <span>Salin <strong>ID Hoki</strong> atau <strong>Nominal Deposit</strong> yang paling resonan dengan Anda.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-xs border border-gold-500/20">4</span>
-                  <span>Gunakan di platform game favorit Anda untuk meningkatkan aura keberuntungan.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Disclaimer Column */}
-            <div className="p-6 rounded-xl bg-black/40 border border-gold-500/20 backdrop-blur-sm flex flex-col justify-center">
-              <h3 className="text-lg font-bold text-zinc-400 mb-3 flex items-center gap-2">
-                <span className="text-xl">⚠️</span> Disclaimer & Kebijakan
-              </h3>
-              <div className="space-y-3 text-zinc-500 text-xs leading-relaxed text-justify">
-                <p>
-                  Alat ini dirancang khusus untuk tujuan <strong>estetika dan hiburan</strong> semata. Algoritma kami menciptakan kombinasi nama dan angka yang terlihat unik dan menarik (Hoki-aesthetic).
-                </p>
-                <p>
-                  Harap diingat bahwa penggunaan ID atau angka cantik dari generator ini <strong>tidak menjamin kemenangan mutlak</strong> dalam permainan apapun. Kemenangan tetap bergantung pada faktor keberuntungan dan keahlian masing-masing pemain.
-                </p>
-                <p>
-                  Kami tidak berafiliasi dengan penyedia layanan perjudian manapun. Gunakan alat ini dengan bijak dan bertanggung jawab.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Tips & Insights Section */}
         <div className="w-full max-w-4xl space-y-8 pt-8 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">

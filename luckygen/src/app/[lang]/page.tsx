@@ -13,9 +13,12 @@ import { applyThemeToSegments } from '@/lib/utils/themes';
 
 import { useThemes } from '@/hooks/useThemes';
 import AuthButton from '@/components/auth/AuthButton';
+import LuckyMascot from '@/components/mascot/LuckyMascot';
+import Wheel3D from '@/components/wheel/Wheel3D';
 
 export default function LandingPage() {
     const { segments, theme, eliminationMode, toggleEliminationMode, eliminateSegment } = useWheelStore();
+    const [is3D, setIs3D] = useState(false);
     const { themes, themeKeys } = useThemes();
 
     // Get current theme config - look up in dynamic themes, fallback to static defaults handled by useThemes or getThemeConfig
@@ -100,14 +103,37 @@ export default function LandingPage() {
                 </div>
 
                 {/* Main Wheel */}
-                <div className="my-12">
-                    <Wheel
-                        segments={themedSegments}
-                        theme={theme}
-                        themeConfig={currentThemeConfig}
-                        eliminationMode={eliminationMode}
-                        onEliminate={handleEliminate}
-                    />
+                <div className="my-12 flex flex-col items-center">
+                    {/* 3D Toggle */}
+                    <div className="mb-6 flex gap-2 bg-white/10 p-1 rounded-lg backdrop-blur-sm">
+                        <button
+                            onClick={() => setIs3D(false)}
+                            className={`px-4 py-2 rounded-md transition-all ${!is3D ? 'bg-purple-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}
+                        >
+                            2D Classic
+                        </button>
+                        <button
+                            onClick={() => setIs3D(true)}
+                            className={`px-4 py-2 rounded-md transition-all ${is3D ? 'bg-purple-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}
+                        >
+                            3D Immersive
+                        </button>
+                    </div>
+
+                    {is3D ? (
+                        <Wheel3D
+                            segments={themedSegments}
+                            themeConfig={currentThemeConfig}
+                        />
+                    ) : (
+                        <Wheel
+                            segments={themedSegments}
+                            theme={theme}
+                            themeConfig={currentThemeConfig}
+                            eliminationMode={eliminationMode}
+                            onEliminate={handleEliminate}
+                        />
+                    )}
                 </div>
 
                 {/* Segment Editor */}
@@ -142,12 +168,21 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Footer */}
+            {/* Luck Gen Footer */}
             <footer className="border-t border-white/10 py-8 mt-16">
                 <div className="container mx-auto px-4 text-center text-gray-400">
                     <p>&copy; 2026 LuckyGen. All rights reserved.</p>
+                    <div className="mt-4">
+                        <a href="/stream-view" target="_blank" className="text-sm text-green-400 hover:text-green-300 flex items-center justify-center gap-1 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
+                            Open Streamer Mode (OBS)
+                        </a>
+                    </div>
                 </div>
             </footer>
+
+            {/* AI Mascot */}
+            <LuckyMascot />
         </main>
     );
 }

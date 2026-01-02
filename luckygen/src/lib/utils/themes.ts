@@ -8,8 +8,11 @@ export interface ThemeConfig {
     colors: string[]; // Color palette for wheel segments
     background: string; // Tailwind gradient classes
     backgroundImageUrl?: string; // Optional background image URL (overrides background classes if present)
-    pointerColor: string; // Color for the pointer/ticker
-    pointerImageUrl?: string; // Optional pointer image URL
+    pointerImageUrl?: string; // Optional custom pointer image URL
+    centerColor?: string; // Color for the center hub
+    textColor?: string; // Color for text on segments
+    pointerColor?: string; // Color for standard pointer
+    buttonStyle?: string; // Custom toggle button styles
     centerButtonGradient: string; // Gradient for center button
     centerButtonStyle?: string; // Custom CSS classes for center button
     winnerGradient: string; // Gradient for winner display

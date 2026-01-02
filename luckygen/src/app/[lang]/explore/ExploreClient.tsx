@@ -25,13 +25,18 @@ interface ExploreClientProps {
     lang: string;
 }
 
+import AuthButton from '@/components/auth/AuthButton';
+
 export default function ExploreClient({ initialWheels, lang }: ExploreClientProps) {
     const router = useRouter();
     const { setSegments, setTitle } = useWheelStore();
 
     const [selectedCategory, setSelectedCategory] = useState('all');
+    // ... existing state ...
     const [searchQuery, setSearchQuery] = useState('');
     const [filteredWheels, setFilteredWheels] = useState<Wheel[]>(initialWheels);
+
+    // ... useEffect ...
 
     // Filter wheels based on category and search
     useEffect(() => {
@@ -54,23 +59,31 @@ export default function ExploreClient({ initialWheels, lang }: ExploreClientProp
     }, [selectedCategory, searchQuery, initialWheels]);
 
     const handlePlay = (slug: string) => {
+        // ...
         router.push(`/${lang}/w/${slug}`);
     };
 
     const handleRemix = (segments: WheelSegment[], title: string) => {
+        // ...
         setSegments(segments);
         setTitle(`${title} (Remix)`);
         router.push(`/${lang}`);
     };
 
     // Separate featured wheels
+    // ...
     const featuredWheels = filteredWheels.filter(w => w.featured);
     const regularWheels = filteredWheels.filter(w => !w.featured);
 
     return (
         <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
-            <div className="container mx-auto px-4 py-12">
-                {/* Header */}
+            <div className="container mx-auto px-4 py-8">
+                {/* Header with Auth */}
+                <div className="flex justify-end mb-4">
+                    <AuthButton />
+                </div>
+
+                {/* Title */}
                 <div className="text-center mb-12">
                     <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
                         Explore Wheels

@@ -11,6 +11,8 @@ import ShareButton from '@/components/shared/ShareButton';
 import { useWheelStore } from '@/lib/store/wheelStore';
 import { applyThemeToSegments } from '@/lib/utils/themes';
 
+import AuthButton from '@/components/auth/AuthButton';
+
 export default function LandingPage() {
     const { segments, theme, eliminationMode, toggleEliminationMode, eliminateSegment } = useWheelStore();
 
@@ -26,8 +28,13 @@ export default function LandingPage() {
             {/* Top Ad Slot */}
             <TopLeaderboard />
 
+            {/* Header / Nav */}
+            <div className="container mx-auto px-4 py-4 flex justify-end">
+                <AuthButton />
+            </div>
+
             {/* Hero Section */}
-            <section className="container mx-auto px-4 py-8 md:py-16">
+            <section className="container mx-auto px-4 py-4 md:py-8">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
                         Spin the Wheel, Make a Decision

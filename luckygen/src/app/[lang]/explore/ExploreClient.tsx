@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CategoryFilter from '@/components/gallery/CategoryFilter';
 import SearchBar from '@/components/gallery/SearchBar';
 import TemplateCard from '@/components/gallery/TemplateCard';
 import InContentAd from '@/components/ads/InContentAd';
+import { InFeedAd } from '@/components/ads/AdUnit';
 import { useWheelStore, WheelSegment } from '@/lib/store/wheelStore';
 import { Sparkles, TrendingUp } from 'lucide-react';
 
@@ -135,15 +136,25 @@ export default function ExploreClient({ initialWheels, lang }: ExploreClientProp
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {regularWheels.map((wheel) => (
-                                <TemplateCard
-                                    key={wheel.id}
-                                    {...wheel}
-                                    lang={lang}
-                                    onPlay={handlePlay}
-                                    onRemix={handleRemix}
-                                />
-                            ))}
+                            {regularWheels.map((wheel, index) => {
+                                const shouldInsertAd = (index + 1) % 6 === 0;
+                                return (
+                                    <React.Fragment key={wheel.id}>
+                                        <TemplateCard
+                                            {...wheel}
+                                            lang={lang}
+                                            onPlay={handlePlay}
+                                            onRemix={handleRemix}
+                                        />
+                                        {/* Insert ad after every 6th card */}
+                                        {shouldInsertAd && index < regularWheels.length - 1 && (
+                                            <div className="col-span-full">
+                                                <InFeedAd slotId={`infeed-${Math.floor(index / 6)}`} />
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })}
                         </div>
                     )}
                 </section>

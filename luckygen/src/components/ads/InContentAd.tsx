@@ -1,14 +1,15 @@
+import { MediumRectangleAd } from './AdUnit';
+
+/**
+ * In-Content Ad Slot (Medium Rectangle)
+ * Placement: Between content sections (300x250)
+ * CLS Prevention: Fixed min-height of 250px
+ */
 export default function InContentAd() {
     return (
         <div className="w-full py-8">
             <div className="container mx-auto px-4">
-                <div
-                    id="in-content-ad"
-                    className="max-w-2xl mx-auto min-h-[250px] bg-white/5 rounded-lg flex items-center justify-center text-gray-500 text-sm"
-                >
-                    {/* Google AdSense code will be inserted here */}
-                    <span className="opacity-50">Advertisement</span>
-                </div>
+                <MediumRectangleAd slotId="9876543210" />
             </div>
         </div>
     );

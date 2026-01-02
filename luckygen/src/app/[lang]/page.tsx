@@ -11,20 +11,52 @@ import ShareButton from '@/components/shared/ShareButton';
 import { useWheelStore } from '@/lib/store/wheelStore';
 import { applyThemeToSegments } from '@/lib/utils/themes';
 
+import { useThemes } from '@/hooks/useThemes';
 import AuthButton from '@/components/auth/AuthButton';
 
 export default function LandingPage() {
     const { segments, theme, eliminationMode, toggleEliminationMode, eliminateSegment } = useWheelStore();
+    const { themes, themeKeys } = useThemes();
+
+    // Get current theme config - look up in dynamic themes, fallback to static defaults handled by useThemes or getThemeConfig
+    const currentThemeConfig = themes?.[theme] || themes?.['default'];
 
     // Apply theme colors to segments
-    const themedSegments = applyThemeToSegments(segments, theme);
+    // We need to use valid ThemeType or string for applyThemeToSegments, but checking if we can pass custom logic?
+    // applyThemeToSegments uses getThemeConfig internally. We should probably update it or just rely on Wheel to render colors?
+    // Actually, applyThemeToSegments modifies state segments color. We should probably just pass the raw segments to Wheel and let Wheel choose colors?
+    // BUT Wheel expects segments to have colors.
+    // For now, let's keep applyThemeToSegments usage but note that it might not pick up dynamic colors unless we update utils.
+    // However, since useThemes returns themes merged with defaults, we can reuse that map.
+    // Ideally applyThemeToSegments should accept a themeConfig object, not just type string.
+    // For this step, I'll stick to 'theme' string, assuming `getThemeConfig` won't find dynamic themes unless `THEME_CONFIGS` is mutable or updated.
+    // Wait, dynamic themes only exist in `useThemes` hook state. `getThemeConfig` in `utils/themes.ts` accesses the static `THEME_CONFIGS`.
+    // So static function won't see dynamic themes.
+    // FIX: Update applyThemeToSegments to accept themeConfig object optionally or we rely on Wheel to color them if passed colors are empty.
+
+    // Actually, `applyThemeToSegments` logic is simple: map index to colors.
+    // Let's do it locally here or update the util function?
+    // Doing it locally is safer for now to avoid widespread refactor.
+    const activeColors = currentThemeConfig?.colors || ['#FF0000', '#0000FF'];
+    const themedSegments = segments.map((s, i) => ({
+        ...s,
+        color: activeColors[i % activeColors.length]
+    }));
 
     const handleEliminate = (text: string) => {
         eliminateSegment(text);
     };
 
+    const bgParams = currentThemeConfig?.backgroundImageUrl
+        ? `url('${currentThemeConfig.backgroundImageUrl}')`
+        : '';
+    const bgClasses = currentThemeConfig?.background || 'from-purple-900 via-blue-900 to-indigo-900';
+
     return (
-        <main className={`min-h-screen bg-gradient-to-br ${applyThemeToSegments([], theme).length === 0 ? 'from-purple-900 via-blue-900 to-indigo-900' : ''} text-white transition-colors duration-500`}>
+        <main
+            className={`min-h-screen text-white transition-colors duration-500 bg-cover bg-center ${!bgParams ? 'bg-gradient-to-br ' + bgClasses : ''}`}
+            style={bgParams ? { backgroundImage: bgParams } : {}}
+        >
             {/* Top Ad Slot */}
             <TopLeaderboard />
 
@@ -49,7 +81,7 @@ export default function LandingPage() {
 
                 {/* Theme Selector */}
                 <div className="my-8">
-                    <ThemeSelector />
+                    <ThemeSelector themes={themes} />
                 </div>
 
                 {/* Elimination Mode Toggle */}
@@ -72,6 +104,7 @@ export default function LandingPage() {
                     <Wheel
                         segments={themedSegments}
                         theme={theme}
+                        themeConfig={currentThemeConfig}
                         eliminationMode={eliminationMode}
                         onEliminate={handleEliminate}
                     />

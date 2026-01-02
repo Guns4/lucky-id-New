@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ThemeType = 'default' | 'casino' | 'anime' | 'dark';
+export type ThemeType = 'default' | 'casino' | 'anime' | 'dark' | string;
 
 export interface WheelSegment {
     text: string;

@@ -1,14 +1,17 @@
 // Theme configuration for the Wheel component
 // Provides color palettes, backgrounds, and visual styles for each theme
 
-export type ThemeType = 'default' | 'casino' | 'anime' | 'dark';
+export type ThemeType = 'default' | 'casino' | 'anime' | 'dark' | string;
 
 export interface ThemeConfig {
     name: string;
     colors: string[]; // Color palette for wheel segments
     background: string; // Tailwind gradient classes
+    backgroundImageUrl?: string; // Optional background image URL (overrides background classes if present)
     pointerColor: string; // Color for the pointer/ticker
+    pointerImageUrl?: string; // Optional pointer image URL
     centerButtonGradient: string; // Gradient for center button
+    centerButtonStyle?: string; // Custom CSS classes for center button
     winnerGradient: string; // Gradient for winner display
     outerRing: string; // Color for outer ring
 }

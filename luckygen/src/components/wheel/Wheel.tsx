@@ -5,7 +5,7 @@ import { motion, useAnimation } from 'framer-motion';
 import { Volume2, VolumeX, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
-import { getThemeConfig, ThemeType } from '@/lib/utils/themes';
+import { getThemeConfig, ThemeType, ThemeConfig } from '@/lib/utils/themes';
 import Toast from '../shared/Toast';
 
 export interface WheelSegment {
@@ -15,7 +15,8 @@ export interface WheelSegment {
 
 interface WheelProps {
     segments: WheelSegment[];
-    theme?: ThemeType;
+    theme?: string; // Changed from ThemeType to allow string keys
+    themeConfig?: ThemeConfig; // Direct config override
     eliminationMode?: boolean;
     onSpinComplete?: (winner: string) => void;
     onEliminate?: (eliminatedText: string) => void;
@@ -24,6 +25,7 @@ interface WheelProps {
 export default function Wheel({
     segments,
     theme = 'default',
+    themeConfig: propThemeConfig,
     eliminationMode = false,
     onSpinComplete,
     onEliminate
@@ -38,7 +40,9 @@ export default function Wheel({
     const spinAudioRef = useRef<HTMLAudioElement | null>(null);
     const winAudioRef = useRef<HTMLAudioElement | null>(null);
 
-    const themeConfig = getThemeConfig(theme);
+    // Use passed config or fallback to static lookup (for backward compat)
+    // Cast theme to ThemeType for getThemeConfig if it matches known keys, otherwise usage might fail without themeConfig
+    const themeConfig = propThemeConfig || getThemeConfig(theme as ThemeType) || getThemeConfig('default');
     const isUltimateWinner = segments.length === 1;
 
     const handleSpin = useCallback(async () => {
@@ -134,9 +138,22 @@ export default function Wheel({
 
     // Render pointer based on theme
     const renderPointer = () => {
+        // Dynamic image pointer (Highest Priority)
+        if (themeConfig.pointerImageUrl) {
+            return (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none -mt-4">
+                    <img
+                        src={themeConfig.pointerImageUrl}
+                        alt="Pointer"
+                        className="w-16 h-16 object-contain drop-shadow-xl filter"
+                    />
+                </div>
+            );
+        }
+
+        // Legacy/Built-in text themes
         switch (theme) {
             case 'casino':
-                // Diamond pointer
                 return (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                         <div
@@ -146,7 +163,6 @@ export default function Wheel({
                     </div>
                 );
             case 'anime':
-                // Sword pointer
                 return (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                         <svg width="30" height="40" viewBox="0 0 30 40">
@@ -160,7 +176,6 @@ export default function Wheel({
                     </div>
                 );
             case 'dark':
-                // Neon arrow with glow
                 return (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                         <div
@@ -173,7 +188,6 @@ export default function Wheel({
                     </div>
                 );
             default:
-                // Default triangle pointer
                 return (
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
                         <div

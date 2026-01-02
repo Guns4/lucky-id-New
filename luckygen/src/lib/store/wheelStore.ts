@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type ThemeType = 'default' | 'casino' | 'anime' | 'dark';
+
 export interface WheelSegment {
     text: string;
     color: string;
@@ -9,12 +11,17 @@ export interface WheelSegment {
 interface WheelStore {
     segments: WheelSegment[];
     title: string;
+    theme: ThemeType;
+    eliminationMode: boolean;
     setTitle: (title: string) => void;
     addSegment: (segment: WheelSegment) => void;
     removeSegment: (index: number) => void;
     updateSegment: (index: number, updates: Partial<WheelSegment>) => void;
     setSegments: (segments: WheelSegment[]) => void;
     clearWheel: () => void;
+    setTheme: (theme: ThemeType) => void;
+    toggleEliminationMode: () => void;
+    eliminateSegment: (text: string) => void;
 }
 
 export const useWheelStore = create<WheelStore>()(
@@ -22,6 +29,8 @@ export const useWheelStore = create<WheelStore>()(
         (set) => ({
             segments: [],
             title: 'My Wheel',
+            theme: 'default',
+            eliminationMode: false,
 
             setTitle: (title) => set({ title }),
 
@@ -43,9 +52,20 @@ export const useWheelStore = create<WheelStore>()(
             setSegments: (segments) => set({ segments }),
 
             clearWheel: () => set({ segments: [], title: 'My Wheel' }),
+
+            setTheme: (theme) => set({ theme }),
+
+            toggleEliminationMode: () =>
+                set((state) => ({ eliminationMode: !state.eliminationMode })),
+
+            eliminateSegment: (text) =>
+                set((state) => ({
+                    segments: state.segments.filter((seg) => seg.text !== text),
+                })),
         }),
         {
             name: 'luckygen-wheel-storage',
         }
     )
 );
+

@@ -1,18 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import Wheel from '@/components/wheel/Wheel';
 import SegmentEditor from '@/components/forms/SegmentEditor';
 import PresetTemplates from '@/components/forms/PresetTemplates';
+import ThemeSelector from '@/components/wheel/ThemeSelector';
 import TopLeaderboard from '@/components/ads/TopLeaderboard';
 import InContentAd from '@/components/ads/InContentAd';
 import ShareButton from '@/components/shared/ShareButton';
 import { useWheelStore } from '@/lib/store/wheelStore';
+import { applyThemeToSegments } from '@/lib/utils/themes';
 
 export default function LandingPage() {
-    const { segments } = useWheelStore();
+    const { segments, theme, eliminationMode, toggleEliminationMode, eliminateSegment } = useWheelStore();
+
+    // Apply theme colors to segments
+    const themedSegments = applyThemeToSegments(segments, theme);
+
+    const handleEliminate = (text: string) => {
+        eliminateSegment(text);
+    };
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+        <main className={`min-h-screen bg-gradient-to-br ${applyThemeToSegments([], theme).length === 0 ? 'from-purple-900 via-blue-900 to-indigo-900' : ''} text-white transition-colors duration-500`}>
             {/* Top Ad Slot */}
             <TopLeaderboard />
 
@@ -30,9 +40,34 @@ export default function LandingPage() {
                 {/* Preset Templates */}
                 <PresetTemplates />
 
+                {/* Theme Selector */}
+                <div className="my-8">
+                    <ThemeSelector />
+                </div>
+
+                {/* Elimination Mode Toggle */}
+                <div className="flex justify-center mb-8">
+                    <label className="flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-lg rounded-xl cursor-pointer hover:bg-white/15 transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={eliminationMode}
+                            onChange={toggleEliminationMode}
+                            className="w-5 h-5 rounded cursor-pointer"
+                        />
+                        <span className="font-semibold">
+                            🔥 Elimination Mode (Remove Winner After Spin)
+                        </span>
+                    </label>
+                </div>
+
                 {/* Main Wheel */}
                 <div className="my-12">
-                    <Wheel segments={segments} />
+                    <Wheel
+                        segments={themedSegments}
+                        theme={theme}
+                        eliminationMode={eliminationMode}
+                        onEliminate={handleEliminate}
+                    />
                 </div>
 
                 {/* Segment Editor */}

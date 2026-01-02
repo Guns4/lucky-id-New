@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Trash2 } from 'lucide-react';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
+import { getThemeConfig, ThemeType } from '@/lib/utils/themes';
 import Confetti from './Confetti';
+import Toast from '../shared/Toast';
 
 export interface WheelSegment {
     text: string;
@@ -13,18 +15,32 @@ export interface WheelSegment {
 
 interface WheelProps {
     segments: WheelSegment[];
+    theme?: ThemeType;
+    eliminationMode?: boolean;
     onSpinComplete?: (winner: string) => void;
+    onEliminate?: (eliminatedText: string) => void;
 }
 
-export default function Wheel({ segments, onSpinComplete }: WheelProps) {
+export default function Wheel({
+    segments,
+    theme = 'default',
+    eliminationMode = false,
+    onSpinComplete,
+    onEliminate
+}: WheelProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
     const [soundEnabled, setSoundEnabled] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [showToast, setShowToast] = useState(false);
 
     const controls = useAnimation();
     const spinAudioRef = useRef<HTMLAudioElement | null>(null);
     const winAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    const themeConfig = getThemeConfig(theme);
+    const isUltimateWinner = segments.length === 1;
 
     const handleSpin = useCallback(async () => {
         if (isSpinning || segments.length === 0) return;
@@ -71,8 +87,72 @@ export default function Wheel({ segments, onSpinComplete }: WheelProps) {
         setTimeout(() => setShowConfetti(false), 3000);
     }, [isSpinning, segments, soundEnabled, controls, onSpinComplete]);
 
+    // Handle elimination when winner modal is closed
+    const handleCloseWinner = () => {
+        if (eliminationMode && winner && segments.length > 1) {
+            // Eliminate the winner
+            onEliminate?.(winner);
+            setToastMessage(`${winner} eliminated! ${segments.length - 1} left.`);
+            setShowToast(true);
+        }
+        setWinner(null);
+    };
+
     const segmentAngle = 360 / (segments.length || 1);
     const radius = 150; // SVG radius
+
+    // Render pointer based on theme
+    const renderPointer = () => {
+        switch (theme) {
+            case 'casino':
+                // Diamond pointer
+                return (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                        <div
+                            className="w-8 h-8 rotate-45"
+                            style={{ backgroundColor: themeConfig.pointerColor }}
+                        />
+                    </div>
+                );
+            case 'anime':
+                // Sword pointer
+                return (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                        <svg width="30" height="40" viewBox="0 0 30 40">
+                            <path
+                                d="M15 0 L18 30 L15 40 L12 30 Z"
+                                fill={themeConfig.pointerColor}
+                                stroke="black"
+                                strokeWidth="1"
+                            />
+                        </svg>
+                    </div>
+                );
+            case 'dark':
+                // Neon arrow with glow
+                return (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                        <div
+                            className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent"
+                            style={{
+                                borderTopColor: themeConfig.pointerColor,
+                                filter: 'drop-shadow(0 0 10px currentColor)'
+                            }}
+                        />
+                    </div>
+                );
+            default:
+                // Default triangle pointer
+                return (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
+                        <div
+                            className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent"
+                            style={{ borderTopColor: themeConfig.pointerColor }}
+                        />
+                    </div>
+                );
+        }
+    };
 
     return (
         <div className="relative flex flex-col items-center justify-center p-4">
@@ -85,12 +165,18 @@ export default function Wheel({ segments, onSpinComplete }: WheelProps) {
                 {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
 
+            {/* Elimination Mode Indicator */}
+            {eliminationMode && (
+                <div className="absolute top-0 left-0 px-3 py-1 bg-red-500/90 rounded-full text-white text-xs font-bold flex items-center gap-1 z-10">
+                    <Trash2 size={14} />
+                    Elimination Mode
+                </div>
+            )}
+
             {/* Wheel Container */}
             <div className="relative w-full max-w-md aspect-square">
-                {/* Fixed pointer at top */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                    <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-red-500" />
-                </div>
+                {/* Themed pointer */}
+                {renderPointer()}
 
                 {/* Spinning Wheel SVG */}
                 <motion.svg
@@ -104,7 +190,7 @@ export default function Wheel({ segments, onSpinComplete }: WheelProps) {
                         cx="0"
                         cy="0"
                         r={radius + 5}
-                        fill="white"
+                        fill={themeConfig.outerRing}
                         className="drop-shadow-lg"
                     />
 
@@ -179,7 +265,15 @@ export default function Wheel({ segments, onSpinComplete }: WheelProps) {
                 <button
                     onClick={handleSpin}
                     disabled={isSpinning || segments.length === 0}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all duration-200 active:scale-95 font-bold text-white text-lg"
+                    className={`
+                        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                        w-20 h-20 rounded-full 
+                        bg-gradient-to-br ${themeConfig.centerButtonGradient}
+                        hover:scale-110
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        shadow-xl transition-all duration-200 active:scale-95 
+                        font-bold text-white text-lg
+                    `}
                     aria-label="Spin the wheel"
                 >
                     {isSpinning ? '...' : 'SPIN'}
@@ -191,14 +285,33 @@ export default function Wheel({ segments, onSpinComplete }: WheelProps) {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 p-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-2xl"
+                    className={`mt-6 p-6 bg-gradient-to-r ${themeConfig.winnerGradient} rounded-2xl shadow-2xl max-w-md w-full`}
                 >
-                    <p className="text-white text-center text-2xl font-bold">🎉 {winner} 🎉</p>
+                    <p className="text-white text-center text-2xl font-bold mb-4">
+                        {isUltimateWinner ? '👑 ULTIMATE WINNER! 👑' : '🎉 Winner! 🎉'}
+                    </p>
+                    <p className="text-white text-center text-3xl font-bold mb-4">
+                        {winner}
+                    </p>
+                    <button
+                        onClick={handleCloseWinner}
+                        className="w-full px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
+                    >
+                        {eliminationMode && segments.length > 1 ? 'Eliminate & Continue' : 'Close'}
+                    </button>
                 </motion.div>
             )}
 
             {/* Confetti */}
             {showConfetti && <Confetti />}
+
+            {/* Toast Notification */}
+            <Toast
+                message={toastMessage}
+                show={showToast}
+                onClose={() => setShowToast(false)}
+                type="success"
+            />
 
             {/* Audio Elements */}
             <audio ref={spinAudioRef} src="/sounds/spin.mp3" preload="auto" />

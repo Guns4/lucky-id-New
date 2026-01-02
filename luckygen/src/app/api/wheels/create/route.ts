@@ -13,8 +13,12 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const supabase = createClient();
+        const supabase = await createClient();
         const slug = await generateUniqueSlug(title);
+
+        // Get current user if logged in
+        const { data: { user } } = await supabase.auth.getUser();
+        const user_id = user ? user.id : null;
 
         const { data, error } = await supabase
             .from('wheels')
@@ -22,6 +26,7 @@ export async function POST(request: NextRequest) {
                 title,
                 segments,
                 slug,
+                user_id
             })
             .select()
             .single();

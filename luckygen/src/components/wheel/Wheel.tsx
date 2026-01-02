@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, animate, useMotionValue, useTransform } from 'framer-motion';
 import { Volume2, VolumeX, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
 import { getThemeConfig, ThemeType, ThemeConfig } from '@/lib/utils/themes';
 import Toast from '../shared/Toast';
+import { useWheelStore } from '@/lib/store/wheelStore';
+import { soundManager } from '@/lib/utils/sounds';
 
 export interface WheelSegment {
     text: string;
@@ -32,13 +34,19 @@ export default function Wheel({
 }: WheelProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
-    const [soundEnabled, setSoundEnabled] = useState(true);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
 
+    const { soundEnabled, toggleSound } = useWheelStore();
+
+    // Framer Motion values for imperative animation
+    const rotation = useMotionValue(0);
     const controls = useAnimation();
-    const spinAudioRef = useRef<HTMLAudioElement | null>(null);
-    const winAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Sync sound manager state
+    React.useEffect(() => {
+        soundManager.setEnabled(soundEnabled);
+    }, [soundEnabled]);
 
     // Use passed config or fallback to static lookup (for backward compat)
     // Cast theme to ThemeType for getThemeConfig if it matches known keys, otherwise usage might fail without themeConfig
@@ -49,28 +57,34 @@ export default function Wheel({
         if (isSpinning || segments.length === 0) return;
 
         setIsSpinning(true);
+        // Play spin sound logic handled by animation ticks
         setWinner(null);
-
-        // Play spin sound
-        if (soundEnabled && spinAudioRef.current) {
-            spinAudioRef.current.currentTime = 0;
-            spinAudioRef.current.play().catch(() => { });
-        }
 
         // Calculate winner deterministically
         const winnerIndex = calculateWinner(segments.length);
         const targetRotation = getRotationForWinner(winnerIndex, segments.length);
 
-        // Animate rotation (3-5 full spins + target position)
         const fullSpins = 3 + Math.random() * 2;
         const totalRotation = 360 * fullSpins + targetRotation;
 
-        await controls.start({
-            rotate: totalRotation,
-            transition: {
-                duration: 4,
-                ease: [0.25, 0.1, 0.25, 1], // Custom easing for natural slowdown
+        let lastTick = 0;
+        const tickThreshold = 360 / (segments.length || 1);
+
+        await animate(rotation, totalRotation, {
+            duration: 4,
+            ease: [0.25, 0.1, 0.25, 1], // Custom easing for natural slowdown
+            onUpdate: (latest) => {
+                // Play tick sound if passed a segment threshold
+                // We use modular arithmetic difference
+                if (Math.abs(latest - lastTick) >= tickThreshold) {
+                    soundManager.playTick();
+                    lastTick = latest;
+                }
             },
+            onComplete: () => {
+                // Ensure final rotation is set
+                rotation.set(totalRotation % 360);
+            }
         });
 
         // Announce winner
@@ -114,9 +128,7 @@ export default function Wheel({
             });
         }
 
-        if (soundEnabled && winAudioRef.current) {
-            winAudioRef.current.play().catch(() => { });
-        }
+        soundManager.playWin();
 
         onSpinComplete?.(winningSegment.text);
         setIsSpinning(false);
@@ -203,7 +215,7 @@ export default function Wheel({
         <div className="relative flex flex-col items-center justify-center p-4">
             {/* Sound Toggle */}
             <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
+                onClick={toggleSound}
                 className="absolute top-0 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
                 aria-label="Toggle sound"
             >
@@ -227,8 +239,7 @@ export default function Wheel({
                 <motion.svg
                     viewBox="-160 -160 320 320"
                     className="w-full h-full drop-shadow-2xl"
-                    animate={controls}
-                    initial={{ rotate: 0 }}
+                    style={{ rotate: rotation }}
                 >
                     {/* Outer ring */}
                     <circle
@@ -355,9 +366,6 @@ export default function Wheel({
                 type="success"
             />
 
-            {/* Audio Elements */}
-            <audio ref={spinAudioRef} src="/sounds/spin.mp3" preload="auto" />
-            <audio ref={winAudioRef} src="/sounds/win.mp3" preload="auto" />
         </div>
     );
 }

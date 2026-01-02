@@ -4,8 +4,10 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Text, Cylinder, Environment, OrbitControls, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { WheelSegment } from '@/lib/store/wheelStore';
+import { WheelSegment, useWheelStore } from '@/lib/store/wheelStore';
 import { ThemeConfig } from '@/lib/utils/themes';
+import { soundManager } from '@/lib/utils/sounds';
+import { Volume2, VolumeX } from 'lucide-react';
 
 interface Wheel3DProps {
     segments: WheelSegment[];
@@ -85,6 +87,12 @@ export default function Wheel3D({ segments, themeConfig, onSpinComplete }: Wheel
     const [rotation, setRotation] = React.useState(0);
     const [isSpinning, setIsSpinning] = React.useState(false);
 
+    // Sound Manager
+    const { soundEnabled, toggleSound } = useWheelStore();
+    React.useEffect(() => {
+        soundManager.setEnabled(soundEnabled);
+    }, [soundEnabled]);
+
     const handleSpin = () => {
         if (isSpinning) return;
         setIsSpinning(true);
@@ -92,15 +100,11 @@ export default function Wheel3D({ segments, themeConfig, onSpinComplete }: Wheel
         const newRotation = rotation + 1440 + Math.random() * 360; // 4+ spins
 
         // Simple animation loop simulation for React state (in real app, useFrame would drive this smoothly)
-        // ideally we pass target rotation to WheelMesh and it lerps
-
-        // For urgency, let's just jump (placeholder). Ideally we animate "rotation" value.
-        // We will pass targetRotation to WheelMesh and handle animation there?
-
-        // Actually, let's use a simple interval for now to mock the spin
         let current = rotation;
         const duration = 5000;
         const startTime = Date.now();
+        const segmentAngle = 360 / (segments.length || 1);
+        let lastTick = rotation;
 
         const animate = () => {
             const now = Date.now();
@@ -109,11 +113,20 @@ export default function Wheel3D({ segments, themeConfig, onSpinComplete }: Wheel
                 const t = elapsed / duration;
                 // easeOutCubic
                 const ease = 1 - Math.pow(1 - t, 3);
-                setRotation(current + (newRotation - current) * ease);
+                const nextRotation = current + (newRotation - current) * ease;
+
+                // Tick Sound Logic
+                if (Math.floor(nextRotation / segmentAngle) !== Math.floor(lastTick / segmentAngle)) {
+                    soundManager.playTick();
+                }
+                lastTick = nextRotation;
+
+                setRotation(nextRotation);
                 requestAnimationFrame(animate);
             } else {
                 setRotation(newRotation);
                 setIsSpinning(false);
+                soundManager.playWin();
                 if (onSpinComplete) onSpinComplete();
             }
         };
@@ -142,6 +155,14 @@ export default function Wheel3D({ segments, themeConfig, onSpinComplete }: Wheel
                 className="absolute bottom-4 z-10 px-8 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-xl rounded-full shadow-lg transform transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isSpinning ? 'Spinning...' : 'SPIN 3D!'}
+            </button>
+
+            {/* Sound Toggle */}
+            <button
+                onClick={toggleSound}
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10 text-white"
+            >
+                {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
             </button>
         </div>
     );

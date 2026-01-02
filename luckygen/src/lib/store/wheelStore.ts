@@ -22,6 +22,8 @@ interface WheelStore {
     setTheme: (theme: ThemeType) => void;
     toggleEliminationMode: () => void;
     eliminateSegment: (text: string) => void;
+    soundEnabled: boolean;
+    toggleSound: () => void;
 }
 
 export const useWheelStore = create<WheelStore>()(
@@ -31,6 +33,7 @@ export const useWheelStore = create<WheelStore>()(
             title: 'My Wheel',
             theme: 'default',
             eliminationMode: false,
+            soundEnabled: true,
 
             setTitle: (title) => set({ title }),
 
@@ -62,6 +65,8 @@ export const useWheelStore = create<WheelStore>()(
                 set((state) => ({
                     segments: state.segments.filter((seg) => seg.text !== text),
                 })),
+
+            toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
         }),
         {
             name: 'luckygen-wheel-storage',

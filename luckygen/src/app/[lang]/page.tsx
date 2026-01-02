@@ -64,7 +64,11 @@ export default function LandingPage() {
             <TopLeaderboard />
 
             {/* Header / Nav */}
-            <div className="container mx-auto px-4 py-4 flex justify-end">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <img src="/logo.png" alt="LuckyGen Logo" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+                    <span className="font-bold text-xl md:text-2xl tracking-tight hidden sm:block">LuckyGen</span>
+                </div>
                 <AuthButton />
             </div>
 

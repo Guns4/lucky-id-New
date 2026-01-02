@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import Wheel from '@/components/wheel/Wheel';
 import { useWheelStore } from '@/lib/store/wheelStore';

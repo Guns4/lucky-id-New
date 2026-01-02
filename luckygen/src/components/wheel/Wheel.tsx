@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { Volume2, VolumeX, Trash2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
 import { getThemeConfig, ThemeType } from '@/lib/utils/themes';
-import Confetti from './Confetti';
 import Toast from '../shared/Toast';
 
 export interface WheelSegment {
@@ -31,7 +31,6 @@ export default function Wheel({
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
     const [soundEnabled, setSoundEnabled] = useState(true);
-    const [showConfetti, setShowConfetti] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
 
@@ -47,7 +46,6 @@ export default function Wheel({
 
         setIsSpinning(true);
         setWinner(null);
-        setShowConfetti(false);
 
         // Play spin sound
         if (soundEnabled && spinAudioRef.current) {
@@ -74,7 +72,43 @@ export default function Wheel({
         // Announce winner
         const winningSegment = segments[winnerIndex];
         setWinner(winningSegment.text);
-        setShowConfetti(true);
+
+        // Trigger confetti with canvas-confetti library
+        if (isUltimateWinner) {
+            // Ultimate winner - Epic confetti burst!
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493'];
+
+            (function frame() {
+                confetti({
+                    particleCount: 7,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors
+                });
+                confetti({
+                    particleCount: 7,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        } else {
+            // Normal win - Standard confetti
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
 
         if (soundEnabled && winAudioRef.current) {
             winAudioRef.current.play().catch(() => { });
@@ -82,9 +116,6 @@ export default function Wheel({
 
         onSpinComplete?.(winningSegment.text);
         setIsSpinning(false);
-
-        // Hide confetti after 3 seconds
-        setTimeout(() => setShowConfetti(false), 3000);
     }, [isSpinning, segments, soundEnabled, controls, onSpinComplete]);
 
     // Handle elimination when winner modal is closed
@@ -301,9 +332,6 @@ export default function Wheel({
                     </button>
                 </motion.div>
             )}
-
-            {/* Confetti */}
-            {showConfetti && <Confetti />}
 
             {/* Toast Notification */}
             <Toast

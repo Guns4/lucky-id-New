@@ -15,35 +15,76 @@ interface Wheel3DProps {
     onSpinComplete?: () => void;
 }
 
-function WheelMesh({ segments, themeConfig, rotation }: { segments: WheelSegment[], themeConfig: ThemeConfig, rotation: number }) {
+function WheelMesh({ segments, themeConfig, rotation, isDemo = false }: { segments: WheelSegment[], themeConfig: ThemeConfig, rotation: number, isDemo?: boolean }) {
     const groupRef = useRef<THREE.Group>(null);
-    const segmentCount = segments.length || 1;
+
+    // Demo segments when wheel is empty
+    const demoSegments: WheelSegment[] = [
+        { text: '🎯 Option 1', color: themeConfig.colors?.[0] || '#FF6B6B' },
+        { text: '🎲 Option 2', color: themeConfig.colors?.[1] || '#4ECDC4' },
+        { text: '🎪 Option 3', color: themeConfig.colors?.[2] || '#FFD93D' },
+        { text: '✨ Option 4', color: themeConfig.colors?.[3] || '#6C5CE7' },
+        { text: '🎁 Option 5', color: themeConfig.colors?.[4] || '#A8E6CF' },
+        { text: '🌟 Add More!', color: themeConfig.colors?.[5] || '#FF8B94' },
+    ];
+
+    const displaySegments = segments.length > 0 ? segments : demoSegments;
+    const showingDemo = segments.length === 0;
+    const segmentCount = displaySegments.length;
     const segmentAngle = (Math.PI * 2) / segmentCount;
 
-    useFrame(() => {
+    // Idle rotation for demo mode
+    const idleRotation = useRef(0);
+
+    useFrame((_, delta) => {
         if (groupRef.current) {
-            // Convert degrees to radians and apply rotation
-            // rotation is expected to be total degrees spun
-            groupRef.current.rotation.z = -THREE.MathUtils.degToRad(rotation);
+            if (showingDemo) {
+                // Gentle idle rotation when showing demo
+                idleRotation.current += delta * 15; // Slow rotation
+                groupRef.current.rotation.z = -THREE.MathUtils.degToRad(idleRotation.current);
+            } else {
+                // Apply actual rotation during spin
+                groupRef.current.rotation.z = -THREE.MathUtils.degToRad(rotation);
+            }
         }
     });
 
     return (
         <group ref={groupRef} rotation={[Math.PI / 2, 0, 0]}>
-            {/* Outer Ring */}
+            {/* Outer Ring - Metallic finish */}
             <mesh position={[0, 0, -0.2]}>
-                <cylinderGeometry args={[2.2, 2.2, 0.5, 64]} />
-                <meshStandardMaterial color={themeConfig.outerRing || '#333'} metalness={0.8} roughness={0.2} />
+                <cylinderGeometry args={[2.3, 2.3, 0.5, 64]} />
+                <meshStandardMaterial
+                    color={themeConfig.outerRing || '#333'}
+                    metalness={0.9}
+                    roughness={0.1}
+                    envMapIntensity={1.5}
+                />
+            </mesh>
+
+            {/* Decorative inner ring */}
+            <mesh position={[0, 0, -0.15]}>
+                <cylinderGeometry args={[2.15, 2.15, 0.3, 64]} />
+                <meshStandardMaterial
+                    color="#1a1a2e"
+                    metalness={0.7}
+                    roughness={0.3}
+                />
             </mesh>
 
             {/* Segments */}
-            {segments.map((segment, i) => (
+            {displaySegments.map((segment, i) => (
                 <group key={i} rotation={[0, -segmentAngle * i - segmentAngle / 2, 0]}>
                     <mesh position={[0, 0, 0]}>
                         <cylinderGeometry
                             args={[2, 2, 0.4, 32, 1, false, 0, segmentAngle]}
                         />
-                        <meshStandardMaterial color={segment.color} metalness={0.3} roughness={0.4} />
+                        <meshStandardMaterial
+                            color={segment.color}
+                            metalness={0.4}
+                            roughness={0.3}
+                            envMapIntensity={0.8}
+                        />
                     </mesh>
 
                     {/* Text Label */}
@@ -51,23 +92,58 @@ function WheelMesh({ segments, themeConfig, rotation }: { segments: WheelSegment
                         <Text
                             position={[0, 0, 0]}
                             rotation={[-Math.PI / 2, 0, -Math.PI / 2]}
-                            fontSize={0.2}
+                            fontSize={0.18}
                             color={themeConfig.textColor || 'white'}
                             anchorX="center"
                             anchorY="middle"
-                            maxWidth={1.5}
+                            maxWidth={1.3}
+                            outlineWidth={0.02}
+                            outlineColor="#000000"
                         >
-                            {segment.text.length > 15 ? segment.text.substring(0, 15) + '...' : segment.text}
+                            {segment.text.length > 12 ? segment.text.substring(0, 12) + '...' : segment.text}
                         </Text>
                     </group>
                 </group>
             ))}
 
-            {/* Center Hub */}
-            <mesh position={[0, 0, 0.1]}>
-                <cylinderGeometry args={[0.3, 0.3, 0.6, 32]} />
-                <meshStandardMaterial color={themeConfig.centerColor || 'white'} metalness={0.9} roughness={0.1} />
+            {/* Center Hub - Premium finish */}
+            <mesh position={[0, 0, 0.15]}>
+                <cylinderGeometry args={[0.4, 0.4, 0.7, 32]} />
+                <meshStandardMaterial
+                    color={themeConfig.centerColor || '#FFD700'}
+                    metalness={1}
+                    roughness={0.05}
+                    envMapIntensity={2}
+                />
             </mesh>
+
+            {/* Center Hub Accent Ring */}
+            <mesh position={[0, 0, 0.25]}>
+                <cylinderGeometry args={[0.45, 0.45, 0.15, 32]} />
+                <meshStandardMaterial
+                    color={themeConfig.outerRing || '#FFFFFF'}
+                    metalness={0.9}
+                    roughness={0.1}
+                />
+            </mesh>
+
+            {/* Demo Mode Indicator */}
+            {showingDemo && (
+                <group position={[0, 0, 0.5]}>
+                    <Text
+                        position={[0, 0, 0]}
+                        rotation={[-Math.PI / 2, 0, 0]}
+                        fontSize={0.15}
+                        color="#FFD700"
+                        anchorX="center"
+                        anchorY="middle"
+                        outlineWidth={0.01}
+                        outlineColor="#000000"
+                    >
+                        ↓ Add options below ↓
+                    </Text>
+                </group>
+            )}
         </group>
     );
 }

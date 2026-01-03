@@ -7,6 +7,7 @@ import { resetColorIndex } from '@/lib/utils/colors';
 const presets = [
     {
         title: 'Yes/No',
+        icon: '✅',
         segments: [
             { text: 'Yes', color: '#4ECDC4' },
             { text: 'No', color: '#FF6B6B' },
@@ -14,6 +15,7 @@ const presets = [
     },
     {
         title: 'What to Eat?',
+        icon: '🍕',
         segments: [
             { text: 'Pizza', color: '#FF6B6B' },
             { text: 'Sushi', color: '#4ECDC4' },
@@ -24,6 +26,7 @@ const presets = [
     },
     {
         title: 'Random 1-100',
+        icon: '🔢',
         segments: Array.from({ length: 10 }, (_, i) => ({
             text: `${(i + 1) * 10}`,
             color: ['#FF6B6B', '#4ECDC4', '#FFD93D', '#6C5CE7', '#A8E6CF', '#FF8B94', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'][i],
@@ -31,6 +34,7 @@ const presets = [
     },
     {
         title: 'Truth or Dare',
+        icon: '🎮',
         segments: [
             { text: 'Truth', color: '#45B7D1' },
             { text: 'Dare', color: '#FF8B94' },
@@ -48,14 +52,25 @@ export default function PresetTemplates() {
     };
 
     return (
-        <div className="flex flex-wrap gap-3 justify-center mb-8">
+        <div className="flex flex-wrap gap-4 justify-center">
             {presets.map((preset) => (
                 <button
                     key={preset.title}
                     onClick={() => handlePresetClick(preset)}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-md"
+                    className="group relative glass-card-hover glass-card px-6 py-4 rounded-2xl font-bold transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-2xl flex items-center gap-3 border border-white/20"
                 >
-                    {preset.title}
+                    {/* Icon with Glow Effect */}
+                    <span className="text-3xl group-hover:scale-110 transition-transform">
+                        {preset.icon}
+                    </span>
+
+                    {/* Text */}
+                    <span className="text-white group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                        {preset.title}
+                    </span>
+
+                    {/* Background Glow on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity pointer-events-none"></div>
                 </button>
             ))}
         </div>

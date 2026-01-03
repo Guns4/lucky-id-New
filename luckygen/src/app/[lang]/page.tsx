@@ -57,94 +57,140 @@ export default function LandingPage() {
 
     return (
         <main
-            className={`min-h-screen text-white transition-colors duration-500 bg-cover bg-center ${!bgParams ? 'bg-gradient-to-br ' + bgClasses : ''}`}
+            className={`min-h-screen text-white transition-colors duration-500 bg-cover bg-center relative ${!bgParams ? 'bg-gradient-to-br ' + bgClasses : ''}`}
             style={bgParams ? { backgroundImage: bgParams } : {}}
         >
+            {/* Animated Background Gradient Overlay */}
+            {!bgParams && (
+                <div className="fixed inset-0 opacity-50 pointer-events-none">
+                    <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-float opacity-70"></div>
+                    <div className="absolute top-0 -right-4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl animate-float opacity-70" style={{ animationDelay: '2s' }}></div>
+                    <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl animate-float opacity-70" style={{ animationDelay: '4s' }}></div>
+                </div>
+            )}
+
             {/* Top Ad Slot */}
             <TopLeaderboard />
 
-            {/* Header / Nav */}
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <img src="/logo.png" alt="LuckyGen Logo" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
-                    <span className="font-bold text-xl md:text-2xl tracking-tight hidden sm:block">LuckyGen</span>
+            {/* Sticky Header / Nav with Glassmorphism */}
+            <div className="sticky top-0 z-50 backdrop-blur-md bg-white/5 border-b border-white/10 shadow-lg">
+                <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                    <div className="flex items-center gap-3 group">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                            <img src="/logo.png" alt="LuckyGen Logo" className="relative w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-2xl" />
+                        </div>
+                        <span className="font-bold text-xl md:text-2xl tracking-tight hidden sm:block bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-pulse-glow">
+                            LuckyGen
+                        </span>
+                    </div>
+                    <AuthButton />
                 </div>
-                <AuthButton />
             </div>
 
-            {/* Hero Section */}
-            <section className="container mx-auto px-4 py-4 md:py-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
-                        Spin the Wheel, Make a Decision
+            {/* Hero Section with Enhanced Styling */}
+            <section className="container mx-auto px-4 py-8 md:py-12 relative z-10">
+                <div className="text-center mb-10 md:mb-16 animate-slide-up">
+                    <h1 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-500 bg-clip-text text-transparent leading-tight drop-shadow-2xl">
+                        Spin the Wheel,<br className="md:hidden" /> Make a Decision ✨
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+                    <p className="text-lg md:text-2xl text-gray-200 max-w-3xl mx-auto font-medium leading-relaxed">
                         Can&apos;t decide? Let fate choose! Create custom wheels, spin, and share with friends.
                     </p>
+                    <div className="flex flex-wrap gap-4 justify-center mt-8">
+                        <div className="glass-card px-6 py-3 rounded-full text-sm md:text-base font-semibold">
+                            🎯 100% Free
+                        </div>
+                        <div className="glass-card px-6 py-3 rounded-full text-sm md:text-base font-semibold">
+                            ⚡ Instant Results
+                        </div>
+                        <div className="glass-card px-6 py-3 rounded-full text-sm md:text-base font-semibold">
+                            🎨 Customizable
+                        </div>
+                    </div>
                 </div>
 
-                {/* Preset Templates */}
-                <PresetTemplates />
+                {/* Preset Templates with Enhanced Style */}
+                <div className="mb-10 animate-slide-up stagger-1">
+                    <PresetTemplates />
+                </div>
 
-                {/* Theme Selector */}
-                <div className="my-8">
+                {/* Theme Selector with Animation */}
+                <div className="my-10 animate-slide-up stagger-2">
                     <ThemeSelector themes={themes} />
                 </div>
 
-                {/* Elimination Mode Toggle */}
-                <div className="flex justify-center mb-8">
-                    <label className="flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-lg rounded-xl cursor-pointer hover:bg-white/15 transition-colors">
+                {/* Elimination Mode Toggle with Better Design */}
+                <div className="flex justify-center mb-10 animate-slide-up stagger-3">
+                    <label className="glass-card-hover glass-card flex items-center gap-4 px-8 py-4 rounded-2xl cursor-pointer shadow-xl">
                         <input
                             type="checkbox"
                             checked={eliminationMode}
                             onChange={toggleEliminationMode}
-                            className="w-5 h-5 rounded cursor-pointer"
+                            className="w-6 h-6 rounded-lg cursor-pointer accent-purple-600"
                         />
-                        <span className="font-semibold">
-                            🔥 Elimination Mode (Remove Winner After Spin)
+                        <span className="font-bold text-base md:text-lg">
+                            🔥 Elimination Mode <span className="text-gray-300 font-normal text-sm">(Remove winner after spin)</span>
                         </span>
                     </label>
                 </div>
 
-                {/* Main Wheel */}
-                <div className="my-12 flex flex-col items-center">
-                    {/* 3D Toggle */}
-                    <div className="mb-6 flex gap-2 bg-white/10 p-1 rounded-lg backdrop-blur-sm">
+                {/* Main Wheel Section with Enhanced Styling */}
+                <div className="my-12 flex flex-col items-center animate-scale-in">
+                    {/* 3D Toggle with Modern Design */}
+                    <div className="mb-8 flex gap-2 glass-card p-2 rounded-2xl backdrop-blur-sm shadow-2xl">
                         <button
                             onClick={() => setIs3D(false)}
-                            className={`px-4 py-2 rounded-md transition-all ${!is3D ? 'bg-purple-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}
+                            className={`px-6 py-3 rounded-xl transition-all font-bold ${!is3D
+                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg scale-105'
+                                    : 'hover:bg-white/10 text-gray-300'
+                                }`}
                         >
                             2D Classic
                         </button>
                         <button
                             onClick={() => setIs3D(true)}
-                            className={`px-4 py-2 rounded-md transition-all ${is3D ? 'bg-purple-600 shadow-lg' : 'hover:bg-white/5 text-gray-400'}`}
+                            className={`px-6 py-3 rounded-xl transition-all font-bold ${is3D
+                                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg scale-105'
+                                    : 'hover:bg-white/10 text-gray-300'
+                                }`}
                         >
                             3D Immersive
                         </button>
                     </div>
 
-                    {is3D ? (
-                        <Wheel3D
-                            segments={themedSegments}
-                            themeConfig={currentThemeConfig}
-                        />
-                    ) : (
-                        <Wheel
-                            segments={themedSegments}
-                            theme={theme}
-                            themeConfig={currentThemeConfig}
-                            eliminationMode={eliminationMode}
-                            onEliminate={handleEliminate}
-                        />
-                    )}
+                    {/* Wheel Container with Decorative Elements */}
+                    <div className="relative">
+                        {/* Glow Effect Behind Wheel */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-full blur-3xl opacity-30 animate-pulse"></div>
+
+                        {/* Wheel Component */}
+                        <div className="relative z-10">
+                            {is3D ? (
+                                <Wheel3D
+                                    segments={themedSegments}
+                                    themeConfig={currentThemeConfig}
+                                />
+                            ) : (
+                                <Wheel
+                                    segments={themedSegments}
+                                    theme={theme}
+                                    themeConfig={currentThemeConfig}
+                                    eliminationMode={eliminationMode}
+                                    onEliminate={handleEliminate}
+                                />
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {/* Segment Editor */}
-                <SegmentEditor />
+                {/* Segment Editor with Glass Effect */}
+                <div className="animate-slide-up stagger-4">
+                    <SegmentEditor />
+                </div>
 
-                {/* Share Button */}
-                <div className="flex justify-center mt-8">
+                {/* Share Button with Better Design */}
+                <div className="flex justify-center mt-10 animate-slide-up stagger-5">
                     <ShareButton />
                 </div>
             </section>
@@ -152,35 +198,108 @@ export default function LandingPage() {
             {/* In-Content Ad */}
             <InContentAd />
 
-            {/* Description for SEO */}
-            <section className="container mx-auto px-4 py-12 max-w-4xl">
-                <h2 className="text-3xl font-bold mb-6">How to Use the Wheel</h2>
-                <div className="prose prose-invert max-w-none">
-                    <p className="text-gray-300 mb-4">
-                        LuckyGen is a free, easy-to-use decision-making tool. Simply add your options,
-                        customize colors, and spin the wheel to let randomness decide for you!
-                    </p>
-                    <h3 className="text-2xl font-semibold mt-8 mb-4">Popular Uses:</h3>
-                    <ul className="list-disc list-inside space-y-2 text-gray-300">
-                        <li>Decide what to eat for lunch or dinner</li>
-                        <li>Pick a random winner for giveaways</li>
-                        <li>Choose truth or dare questions</li>
-                        <li>Make yes/no decisions</li>
-                        <li>Random number generation</li>
-                        <li>Team building activities</li>
-                    </ul>
+            {/* Description for SEO with Better Styling */}
+            <section className="container mx-auto px-4 py-16 max-w-5xl">
+                <div className="glass-card rounded-3xl p-8 md:p-12 shadow-2xl">
+                    <h2 className="text-4xl md:text-5xl font-black mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        How to Use the Wheel
+                    </h2>
+                    <div className="prose prose-invert max-w-none">
+                        <p className="text-gray-200 mb-6 text-lg leading-relaxed">
+                            LuckyGen is a free, easy-to-use decision-making tool. Simply add your options,
+                            customize colors, and spin the wheel to let randomness decide for you!
+                        </p>
+                        <h3 className="text-3xl font-bold mt-12 mb-6 text-purple-300">Popular Uses:</h3>
+                        <ul className="grid md:grid-cols-2 gap-4 text-gray-200 text-lg">
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">🍕</span>
+                                <span>Decide what to eat for lunch or dinner</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">🎁</span>
+                                <span>Pick a random winner for giveaways</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">🎮</span>
+                                <span>Choose truth or dare questions</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">✅</span>
+                                <span>Make yes/no decisions</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">🔢</span>
+                                <span>Random number generation</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <span className="text-2xl">🤝</span>
+                                <span>Team building activities</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </section>
 
-            {/* Luck Gen Footer */}
-            <footer className="border-t border-white/10 py-8 mt-16">
-                <div className="container mx-auto px-4 text-center text-gray-400">
-                    <p>&copy; 2026 LuckyGen. All rights reserved.</p>
-                    <div className="mt-4">
-                        <a href="/stream-view" target="_blank" className="text-sm text-green-400 hover:text-green-300 flex items-center justify-center gap-1 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
-                            Open Streamer Mode (OBS)
-                        </a>
+            {/* Modern Footer with Multiple Columns */}
+            <footer className="border-t border-white/10 bg-black/40 backdrop-blur-lg mt-20">
+                <div className="container mx-auto px-4 py-12">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                        {/* Brand Column */}
+                        <div className="md:col-span-2">
+                            <div className="flex items-center gap-3 mb-4">
+                                <img src="/logo.png" alt="LuckyGen Logo" className="w-10 h-10 object-contain" />
+                                <span className="font-bold text-2xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    LuckyGen
+                                </span>
+                            </div>
+                            <p className="text-gray-400 mb-4 max-w-md leading-relaxed">
+                                The ultimate random decision maker. Spin the wheel and let fate decide!
+                                Perfect for games, giveaways, and everyday choices.
+                            </p>
+                            <div className="flex gap-4">
+                                <a href="#" className="glass-card-hover glass-card p-3 rounded-lg">
+                                    <span className="text-xl">🐦</span>
+                                </a>
+                                <a href="#" className="glass-card-hover glass-card p-3 rounded-lg">
+                                    <span className="text-xl">📱</span>
+                                </a>
+                                <a href="#" className="glass-card-hover glass-card p-3 rounded-lg">
+                                    <span className="text-xl">📧</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Quick Links */}
+                        <div>
+                            <h4 className="font-bold text-lg mb-4 text-purple-300">Quick Links</h4>
+                            <ul className="space-y-2">
+                                <li><a href="/en/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                                <li><a href="/en/explore" className="text-gray-400 hover:text-white transition-colors">Explore Wheels</a></li>
+                                <li><a href="/en/contact" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                                <li>
+                                    <a href="/stream-view" target="_blank" className="text-green-400 hover:text-green-300 flex items-center gap-2 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
+                                        Streamer Mode
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Legal */}
+                        <div>
+                            <h4 className="font-bold text-lg mb-4 text-purple-300">Legal</h4>
+                            <ul className="space-y-2">
+                                <li><a href="/en/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                                <li><a href="/en/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Copyright */}
+                    <div className="border-t border-white/10 pt-8 text-center">
+                        <p className="text-gray-400">
+                            &copy; 2026 LuckyGen. All rights reserved. Made with ❤️ for decision makers everywhere.
+                        </p>
                     </div>
                 </div>
             </footer>

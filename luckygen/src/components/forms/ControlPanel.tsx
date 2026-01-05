@@ -113,8 +113,8 @@ export default function ControlPanel({
                     <button
                         onClick={() => handleTabChange('entries')}
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'entries'
-                                ? 'bg-white text-purple-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
+                            ? 'bg-white text-purple-600 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
                         <Edit3 size={18} />
@@ -123,8 +123,8 @@ export default function ControlPanel({
                     <button
                         onClick={() => handleTabChange('settings')}
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'settings'
-                                ? 'bg-white text-purple-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
+                            ? 'bg-white text-purple-600 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
                             }`}
                     >
                         <Settings2 size={18} />
@@ -257,7 +257,7 @@ export default function ControlPanel({
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Wheel Theme
                             </label>
-                            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                            <div className="bg-slate-900 p-4 rounded-xl shadow-inner">
                                 <ThemeSelector themes={themes} />
                             </div>
                         </div>

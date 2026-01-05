@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { THEME_CONFIGS, ThemeConfig, ThemeType } from '@/lib/utils/themes';
+import { THEME_CONFIGS, ThemeConfig } from '@/lib/utils/themes';
 
 interface UseThemesReturn {
     themes: Record<string, ThemeConfig>;

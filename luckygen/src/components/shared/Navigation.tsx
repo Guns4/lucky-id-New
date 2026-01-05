@@ -32,15 +32,18 @@ export default function Navigation() {
         return () => subscription.unsubscribe();
     }, [supabase]);
 
-    // Base navigation links
+    // Base navigation links - always visible
     const baseNavLinks = [
         { href: '/', label: 'Home', icon: Home },
-        { href: '/explore', label: 'Explore', icon: Compass },
     ];
 
-    // Add Dashboard only if logged in
+    // Add Explore and Dashboard only if logged in
     const navLinks = isLoggedIn
-        ? [...baseNavLinks, { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }]
+        ? [
+            ...baseNavLinks,
+            { href: '/explore', label: 'Explore', icon: Compass },
+            { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }
+        ]
         : baseNavLinks;
 
     const isActive = (href: string) => {

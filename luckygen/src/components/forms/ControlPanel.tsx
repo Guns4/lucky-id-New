@@ -40,13 +40,14 @@ export default function ControlPanel({
     const [activeTab, setActiveTab] = useState<'entries' | 'settings'>('entries');
     const [bulkText, setBulkText] = useState('');
     const [newSegmentText, setNewSegmentText] = useState('');
+    const [showBulkEdit, setShowBulkEdit] = useState(false);
 
-    // Sync bulk text with segments when switching to entries tab
-    const handleTabChange = (tab: 'entries' | 'settings') => {
-        if (tab === 'entries' && activeTab !== 'entries') {
+    // Sync bulk text with segments when opening bulk edit
+    const toggleBulkEdit = () => {
+        if (!showBulkEdit) {
             setBulkText(segments.map(s => s.text).join('\n'));
         }
-        setActiveTab(tab);
+        setShowBulkEdit(!showBulkEdit);
     };
 
     // Update segments from bulk textarea
@@ -62,20 +63,19 @@ export default function ControlPanel({
         }));
 
         setSegments(newSegments);
+        setShowBulkEdit(false);
     };
 
     // Shuffle segments
     const handleShuffle = () => {
         const shuffled = [...segments].sort(() => Math.random() - 0.5);
         setSegments(shuffled);
-        setBulkText(shuffled.map(s => s.text).join('\n'));
     };
 
     // Sort segments alphabetically
     const handleSort = () => {
         const sorted = [...segments].sort((a, b) => a.text.localeCompare(b.text));
         setSegments(sorted);
-        setBulkText(sorted.map(s => s.text).join('\n'));
     };
 
     // Add single segment
@@ -96,7 +96,7 @@ export default function ControlPanel({
     };
 
     return (
-        <div className="h-full bg-white lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto">
+        <div className="h-full bg-white lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto font-sans">
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -111,7 +111,7 @@ export default function ControlPanel({
                 {/* Tab Navigation */}
                 <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
                     <button
-                        onClick={() => handleTabChange('entries')}
+                        onClick={() => setActiveTab('entries')}
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'entries'
                             ? 'bg-white text-purple-600 shadow-sm'
                             : 'text-gray-600 hover:text-gray-900'
@@ -121,7 +121,7 @@ export default function ControlPanel({
                         <span>Entries</span>
                     </button>
                     <button
-                        onClick={() => handleTabChange('settings')}
+                        onClick={() => setActiveTab('settings')}
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'settings'
                             ? 'bg-white text-purple-600 shadow-sm'
                             : 'text-gray-600 hover:text-gray-900'
@@ -137,94 +137,112 @@ export default function ControlPanel({
             <div className="p-6">
                 {activeTab === 'entries' ? (
                     <div className="space-y-6">
-                        {/* Bulk Input Section */}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Quick Add (one per line)
-                            </label>
-                            <textarea
-                                value={bulkText}
-                                onChange={(e) => setBulkText(e.target.value)}
-                                onBlur={handleBulkUpdate}
-                                placeholder="Pizza&#10;Burger&#10;Sushi&#10;Tacos"
-                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all resize-none"
-                                rows={5}
-                            />
-                            <div className="flex gap-2 mt-2">
-                                <button
-                                    onClick={handleShuffle}
-                                    disabled={segments.length < 2}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all"
-                                >
-                                    <Shuffle size={16} />
-                                    Shuffle
-                                </button>
-                                <button
-                                    onClick={handleSort}
-                                    disabled={segments.length < 2}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all"
-                                >
-                                    <ArrowDownAZ size={16} />
-                                    Sort A-Z
-                                </button>
-                            </div>
+                        {/* Toolbar Actions */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleShuffle}
+                                disabled={segments.length < 2}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold text-sm transition-all border border-blue-200"
+                            >
+                                <Shuffle size={14} />
+                                Shuffle
+                            </button>
+                            <button
+                                onClick={handleSort}
+                                disabled={segments.length < 2}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold text-sm transition-all border border-purple-200"
+                            >
+                                <ArrowDownAZ size={14} />
+                                Sort A-Z
+                            </button>
+                            <button
+                                onClick={toggleBulkEdit}
+                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm transition-all border ${showBulkEdit
+                                    ? 'bg-gray-800 text-white border-gray-800'
+                                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'}`}
+                            >
+                                <Edit3 size={14} />
+                                {showBulkEdit ? 'Done' : 'Bulk Edit'}
+                            </button>
                         </div>
 
-                        {/* Single Add Section */}
+                        {/* Bulk Edit Section (Collapsible) */}
+                        {showBulkEdit && (
+                            <div className="animate-in slide-in-from-top-2 duration-200">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Paste list (one per line)
+                                </label>
+                                <textarea
+                                    value={bulkText}
+                                    onChange={(e) => setBulkText(e.target.value)}
+                                    placeholder="Pizza&#10;Burger&#10;Sushi&#10;Tacos"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all resize-none font-mono text-sm"
+                                    rows={6}
+                                />
+                                <button
+                                    onClick={handleBulkUpdate}
+                                    className="w-full mt-2 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors"
+                                >
+                                    Update Wheel
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Add Single Entry */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Add Single Entry
-                            </label>
                             <div className="flex gap-2">
                                 <input
                                     type="text"
                                     value={newSegmentText}
                                     onChange={(e) => setNewSegmentText(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    placeholder="Enter option..."
-                                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all"
+                                    placeholder="Type & Enter to add..."
+                                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all shadow-sm"
                                     maxLength={30}
                                 />
                                 <button
                                     onClick={handleAddSegment}
-                                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold transition-all duration-200 active:scale-95 shadow-lg hover:shadow-xl flex items-center gap-2 text-white"
+                                    className="px-5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold transition-all duration-200 active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center text-white"
                                 >
-                                    <Plus size={20} strokeWidth={3} />
+                                    <Plus size={24} strokeWidth={3} />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Segments List */}
+                        {/* Segments Grid */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                Entries ({segments.length})
-                            </label>
-                            <div className="space-y-2 max-h-96 overflow-y-auto">
+                            <div className="flex justify-between items-center mb-3">
+                                <label className="text-sm font-semibold text-gray-700">
+                                    Entries ({segments.length})
+                                </label>
+                                <span className="text-xs text-gray-400">Click color to change</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-1">
                                 {segments.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-400">
+                                    <div className="col-span-2 text-center py-10 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 text-gray-400">
                                         <div className="text-4xl mb-2">🎯</div>
-                                        <p className="text-sm">Add at least 2 options to start spinning!</p>
+                                        <p className="text-sm font-medium">No items yet</p>
+                                        <p className="text-xs mt-1">Add items or use Bulk Edit</p>
                                     </div>
                                 ) : (
                                     segments.map((segment, index) => (
                                         <div
                                             key={index}
-                                            className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all"
+                                            className="group flex items-center gap-2 p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all"
                                         >
-                                            {/* Color Picker */}
-                                            <div className="relative group">
+                                            {/* Color Picker (Compact) */}
+                                            <div className="relative shrink-0">
                                                 <input
                                                     type="color"
                                                     value={segment.color}
                                                     onChange={(e) => updateSegment(index, { color: e.target.value })}
-                                                    className="w-10 h-10 rounded-lg cursor-pointer opacity-0 absolute"
+                                                    className="w-6 h-6 rounded-full cursor-pointer opacity-0 absolute inset-0 z-10"
                                                 />
                                                 <div
-                                                    className="w-10 h-10 rounded-lg border-2 border-gray-300 cursor-pointer group-hover:scale-110 transition-all flex items-center justify-center shadow-sm"
+                                                    className="w-6 h-6 rounded-full border border-gray-200 shadow-sm"
                                                     style={{ backgroundColor: segment.color }}
-                                                >
-                                                    <Palette size={16} className="text-white/90" strokeWidth={2.5} />
-                                                </div>
+                                                />
                                             </div>
 
                                             {/* Segment Text */}
@@ -232,17 +250,17 @@ export default function ControlPanel({
                                                 type="text"
                                                 value={segment.text}
                                                 onChange={(e) => updateSegment(index, { text: e.target.value })}
-                                                className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 text-gray-900 transition-all"
+                                                className="flex-1 min-w-0 bg-transparent py-1 text-sm font-medium text-gray-700 focus:outline-none focus:text-purple-600 truncate"
                                                 maxLength={30}
                                             />
 
-                                            {/* Delete Button */}
+                                            {/* Delete Button (Visible on hover or always on touch) */}
                                             <button
                                                 onClick={() => removeSegment(index)}
-                                                className="p-2 hover:bg-red-50 rounded-lg transition-all text-red-500 hover:text-red-600"
+                                                className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shrink-0"
                                                 aria-label="Remove segment"
                                             >
-                                                <Trash2 size={18} strokeWidth={2.5} />
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     ))
@@ -252,7 +270,7 @@ export default function ControlPanel({
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {/* Theme Selector */}
+                        {/* Theme Selector - Wrapped for contrast */}
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Wheel Theme
@@ -267,7 +285,7 @@ export default function ControlPanel({
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
                                 Game Options
                             </label>
-                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all">
+                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">🔥</span>
                                     <div>
@@ -286,7 +304,7 @@ export default function ControlPanel({
 
                         {/* Sound Toggle */}
                         <div>
-                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all">
+                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">🔊</span>
                                     <div>

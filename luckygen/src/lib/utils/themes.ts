@@ -151,6 +151,72 @@ export const THEME_CONFIGS: Record<ThemeType, ThemeConfig> = {
         winnerGradient: 'from-yellow-400 to-pink-500',
         outerRing: '#FFD700',
     },
+    sunset: {
+        name: 'Sunset Glow',
+        colors: [
+            '#FF6B6B', '#FFA07A', '#FFD700', '#FF69B4',
+            '#FF8C00', '#FF1493', '#FF6347', '#FFA500',
+            '#FF6B6B', '#FFA07A', '#FFD700', '#FF69B4'
+        ],
+        background: 'from-red-500 via-orange-500 to-yellow-500',
+        pointerColor: '#FFFF00',
+        centerButtonGradient: 'from-red-400 to-yellow-500',
+        winnerGradient: 'from-red-400 to-yellow-400',
+        outerRing: '#FFD700',
+    },
+    midnight: {
+        name: 'Midnight Blue',
+        colors: [
+            '#191970', '#4169E1', '#1E90FF', '#00BFFF',
+            '#000080', '#483D8B', '#191970', '#4169E1',
+            '#1E90FF', '#00BFFF', '#000080', '#483D8B'
+        ],
+        background: 'from-indigo-950 via-blue-950 to-slate-900',
+        pointerColor: '#00BFFF',
+        centerButtonGradient: 'from-blue-500 to-indigo-700',
+        winnerGradient: 'from-blue-400 to-indigo-600',
+        outerRing: '#4169E1',
+    },
+    tropical: {
+        name: 'Tropical Paradise',
+        colors: [
+            '#00CED1', '#20B2AA', '#48D1CC', '#40E0D0',
+            '#00FA9A', '#7FFFD4', '#00CED1', '#20B2AA',
+            '#48D1CC', '#40E0D0', '#00FA9A', '#7FFFD4'
+        ],
+        background: 'from-cyan-500 via-teal-500 to-emerald-500',
+        pointerColor: '#00FA9A',
+        centerButtonGradient: 'from-cyan-400 to-teal-600',
+        winnerGradient: 'from-cyan-400 to-emerald-500',
+        outerRing: '#00CED1',
+    },
+    galaxy: {
+        name: 'Galaxy Space',
+        colors: [
+            '#9D4EDD', '#7209B7', '#560BAD', '#3C096C',
+            '#B5179E', '#F72585', '#9D4EDD', '#7209B7',
+            '#560BAD', '#3C096C', '#B5179E', '#F72585'
+        ],
+        background: 'from-purple-950 via-fuchsia-900 to-pink-900',
+        pointerColor: '#F72585',
+        centerButtonGradient: 'from-purple-500 to-pink-600',
+        winnerGradient: 'from-purple-400 to-pink-500',
+        outerRing: '#9D4EDD',
+    },
+    candy: {
+        name: 'Candy Shop',
+        colors: [
+            '#FF69B4', '#FFB6C1', '#FFC0CB', '#FF1493',
+            '#C71585', '#DB7093', '#FF69B4', '#FFB6C1',
+            '#FFC0CB', '#FF1493', '#C71585', '#DB7093'
+        ],
+        background: 'from-pink-400 via-rose-400 to-fuchsia-500',
+        pointerColor: '#FF1493',
+        textColor: '#FFFFFF',
+        centerButtonGradient: 'from-pink-400 to-fuchsia-600',
+        winnerGradient: 'from-pink-300 to-fuchsia-500',
+        outerRing: '#FF69B4',
+    },
 };
 
 /**

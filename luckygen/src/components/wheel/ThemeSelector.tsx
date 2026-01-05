@@ -1,5 +1,5 @@
 import { ComponentType } from 'react';
-import { Sparkles, Diamond, Swords, Zap, Flame, Sunset, Cloud, Waves, TreePine, PartyPopper, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Diamond, Swords, Zap, Flame, Sunset as SunsetIcon, Cloud, Waves, TreePine, PartyPopper, Moon, Palmtree, Telescope, Candy, Image as ImageIcon } from 'lucide-react';
 import { useWheelStore } from '@/lib/store/wheelStore';
 import { ThemeConfig, ThemeType } from '@/lib/utils/themes';
 
@@ -14,11 +14,16 @@ const themeIcons: Record<string, ComponentType<{ size?: number; className?: stri
     anime: Swords,
     dark: Zap,
     neon: Flame,
-    retro: Sunset,
+    retro: SunsetIcon,
     pastel: Cloud,
     ocean: Waves,
     forest: TreePine,
     party: PartyPopper,
+    sunset: SunsetIcon,
+    midnight: Moon,
+    tropical: Palmtree,
+    galaxy: Telescope,
+    candy: Candy,
 };
 
 // Mini wheel preview component

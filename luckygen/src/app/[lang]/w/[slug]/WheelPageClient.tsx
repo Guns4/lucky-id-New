@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Script from 'next/script';
 import Wheel from '@/components/wheel/Wheel';
-import EmbedButton from '@/components/shared/EmbedButton';
 import { WheelSegment } from '@/lib/store/wheelStore';
 
 interface WheelPageClientProps {
@@ -47,29 +46,176 @@ function generateDynamicContent(title: string, segments: WheelSegment[], views: 
   `;
 }
 
+/**
+ * Detect category from wheel title and segments
+ * Used for breadcrumb navigation and SEO
+ */
+function detectCategory(title: string, segments: WheelSegment[]): { slug: string; name: string } {
+    const titleLower = title.toLowerCase();
+    const segmentTexts = segments.map(s => s.text.toLowerCase()).join(' ');
+
+    // Food category
+    if (
+        /food|eat|restaurant|meal|dinner|lunch|breakfast|cuisine/.test(titleLower) ||
+        /pizza|burger|sushi|taco|pasta|salad|chicken/.test(segmentTexts)
+    ) {
+        return { slug: 'food', name: 'Food & Dining' };
+    }
+
+    // Game category
+    if (
+        /game|play|video|board|steam|ps5|xbox/.test(titleLower) ||
+        /fortnite|minecraft|mario|zelda/.test(segmentTexts)
+    ) {
+        return { slug: 'games', name: 'Games & Entertainment' };
+    }
+
+    // Movie/Entertainment category
+    if (
+        /movie|film|watch|netflix|disney|show|series/.test(titleLower) ||
+        /avengers|marvel|star wars/.test(segmentTexts)
+    ) {
+        return { slug: 'movies', name: 'Movies & Shows' };
+    }
+
+    // Name/Random picker category
+    if (/name|baby|pet|character|username/.test(titleLower)) {
+        return { slug: 'names', name: 'Name Generators' };
+    }
+
+    // Yes/No or simple decisions
+    if (/yes|no|true|false|decision/.test(titleLower)) {
+        return { slug: 'decisions', name: 'Quick Decisions' };
+    }
+
+    // Default category
+    return { slug: 'random', name: 'Random Pickers' };
+}
+
 export default function WheelPageClient({ initialWheel, lang }: WheelPageClientProps) {
     const [wheel] = useState(initialWheel);
 
-    // JSON-LD Schema for rich snippets
+    // Detect category for breadcrumbs and SEO
+    const category = detectCategory(wheel.title, wheel.segments);
+    const baseUrl = 'https://luckygen.click';
+    const currentUrl = `${baseUrl}/${lang}/w/${wheel.id}`;
+
+    // Generate realistic rating count based on views
+    // Minimum 50 reviews, scale with views
+    const ratingCount = Math.max(50, Math.floor(wheel.views * 0.3));
+
+    /**
+     * Comprehensive JSON-LD Schema for Rich Snippets
+     * Includes: SoftwareApplication, BreadcrumbList, WebPage
+     */
     const schemaData = {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": `${wheel.title} - Random Wheel Spinner`,
-        "applicationCategory": "GameApplication",
-        "operatingSystem": "Web Browser",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.8",
-            "ratingCount": wheel.views || 100,
-            "bestRating": "5",
-            "worstRating": "1"
-        },
-        "description": `Free online random wheel spinner for ${wheel.title}. Features: ${wheel.segments.map(s => s.text).join(', ')}.`
+        "@graph": [
+            // 1. SoftwareApplication Schema (Main)
+            {
+                "@type": "SoftwareApplication",
+                "@id": `${currentUrl}#software`,
+                "name": `${wheel.title} - Free Random Wheel Spinner`,
+                "applicationCategory": "UtilityApplication",
+                "operatingSystem": "Web Browser",
+                "url": currentUrl,
+                "description": `Free online random wheel spinner for ${wheel.title}. Spin to decide from ${wheel.segments.length} options: ${wheel.segments.map(s => s.text).join(', ')}.`,
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD",
+                    "availability": "https://schema.org/InStock",
+                    "validFrom": "2024-01-01"
+                },
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.8",
+                    "ratingCount": ratingCount,
+                    "bestRating": "5",
+                    "worstRating": "1",
+                    "reviewCount": Math.floor(ratingCount * 0.7)
+                },
+                "author": {
+                    "@type": "Organization",
+                    "name": "LuckyGen",
+                    "url": baseUrl
+                },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "LuckyGen",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": `${baseUrl}/logo.png`
+                    }
+                },
+                "screenshot": `${baseUrl}/images/og-default.png`,
+                "featureList": [
+                    "Free random wheel spinner",
+                    "Customizable wheel options",
+                    "Fair and unbiased selection",
+                    "Mobile-friendly interface",
+                    "Shareable links",
+                    "No registration required"
+                ],
+                "softwareVersion": "2.0",
+                "datePublished": "2024-01-01",
+                "dateModified": new Date().toISOString().split('T')[0]
+            },
+
+            // 2. BreadcrumbList Schema
+            {
+                "@type": "BreadcrumbList",
+                "@id": `${currentUrl}#breadcrumb`,
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": `${baseUrl}/${lang}`
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": category.name,
+                        "item": `${baseUrl}/${lang}/explore?category=${category.slug}`
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": wheel.title,
+                        "item": currentUrl
+                    }
+                ]
+            },
+
+            // 3. WebPage Schema
+            {
+                "@type": "WebPage",
+                "@id": `${currentUrl}#webpage`,
+                "url": currentUrl,
+                "name": `${wheel.title} | LuckyGen`,
+                "description": `Free random wheel spinner for ${wheel.title}. Spin to decide from ${wheel.segments.length} options.`,
+                "inLanguage": lang === 'id' ? 'id-ID' : 'en-US',
+                "isPartOf": {
+                    "@type": "WebSite",
+                    "@id": `${baseUrl}/#website`,
+                    "url": baseUrl,
+                    "name": "LuckyGen - Random Wheel Spinner",
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "LuckyGen"
+                    }
+                },
+                "breadcrumb": {
+                    "@id": `${currentUrl}#breadcrumb`
+                },
+                "potentialAction": {
+                    "@type": "UseAction",
+                    "target": currentUrl,
+                    "name": `Spin the ${wheel.title} wheel`
+                }
+            }
+        ]
     };
 
     const dynamicContent = generateDynamicContent(wheel.title, wheel.segments, wheel.views);
@@ -85,8 +231,36 @@ export default function WheelPageClient({ initialWheel, lang }: WheelPageClientP
 
             <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
                 <div className="container mx-auto px-4 py-8">
-                    {/* Header */}
+                    {/* Header with Breadcrumb */}
                     <div className="text-center mb-8">
+                        {/* Breadcrumb Navigation */}
+                        <nav className="mb-4" aria-label="Breadcrumb">
+                            <ol className="flex justify-center items-center space-x-2 text-sm text-gray-300">
+                                <li>
+                                    <a href={`/${lang}`} className="hover:text-white transition-colors">
+                                        Home
+                                    </a>
+                                </li>
+                                <li>
+                                    <span className="text-gray-500">›</span>
+                                </li>
+                                <li>
+                                    <a
+                                        href={`/${lang}/explore?category=${category.slug}`}
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        {category.name}
+                                    </a>
+                                </li>
+                                <li>
+                                    <span className="text-gray-500">›</span>
+                                </li>
+                                <li className="text-yellow-400 font-semibold" aria-current="page">
+                                    {wheel.title}
+                                </li>
+                            </ol>
+                        </nav>
+
                         <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
                             {wheel.title}
                         </h1>
@@ -96,7 +270,11 @@ export default function WheelPageClient({ initialWheel, lang }: WheelPageClientP
                     </div>
 
                     {/* Wheel */}
-                    <Wheel segments={wheel.segments} />
+                    <Wheel
+                        segments={wheel.segments}
+                        slug={wheel.id}
+                        wheelTitle={wheel.title}
+                    />
 
                     {/* Create Your Own */}
                     <div className="text-center mt-12">

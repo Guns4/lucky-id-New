@@ -2,13 +2,14 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { motion, useAnimation, animate, useMotionValue, useTransform } from 'framer-motion';
-import { Volume2, VolumeX, Trash2 } from 'lucide-react';
+import { Volume2, VolumeX, Trash2, Share2, Copy, Code } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
 import { getThemeConfig, ThemeType, ThemeConfig } from '@/lib/utils/themes';
 import Toast from '../shared/Toast';
+import EmbedCodeModal from '../shared/EmbedCodeModal';
 import { useWheelStore } from '@/lib/store/wheelStore';
-import { soundManager } from '@/lib/utils/sounds';
+import { useWheelSound } from '@/hooks/useWheelSound';
 
 export interface WheelSegment {
     text: string;
@@ -22,6 +23,8 @@ interface WheelProps {
     eliminationMode?: boolean;
     onSpinComplete?: (winner: string) => void;
     onEliminate?: (eliminatedText: string) => void;
+    slug?: string; // Optional slug for embed code
+    wheelTitle?: string; // Optional title for embed modal
 }
 
 export default function Wheel({
@@ -30,23 +33,22 @@ export default function Wheel({
     themeConfig: propThemeConfig,
     eliminationMode = false,
     onSpinComplete,
-    onEliminate
+    onEliminate,
+    slug,
+    wheelTitle
 }: WheelProps) {
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
+    const [embedModalOpen, setEmbedModalOpen] = useState(false);
 
-    const { soundEnabled, toggleSound } = useWheelStore();
+    // Synthesized audio hook (no MP3 files needed!)
+    const { playTick, playWin, enabled: soundEnabled, toggleSound } = useWheelSound();
 
     // Framer Motion values for imperative animation
     const rotation = useMotionValue(0);
     const controls = useAnimation();
-
-    // Sync sound manager state
-    React.useEffect(() => {
-        soundManager.setEnabled(soundEnabled);
-    }, [soundEnabled]);
 
     // Use passed config or fallback to static lookup (for backward compat)
     // Cast theme to ThemeType for getThemeConfig if it matches known keys, otherwise usage might fail without themeConfig
@@ -77,7 +79,7 @@ export default function Wheel({
                 // Play tick sound if passed a segment threshold
                 // We use modular arithmetic difference
                 if (Math.abs(latest - lastTick) >= tickThreshold) {
-                    soundManager.playTick();
+                    playTick(); // Synthesized sound + haptic feedback
                     lastTick = latest;
                 }
             },
@@ -128,11 +130,11 @@ export default function Wheel({
             });
         }
 
-        soundManager.playWin();
+        playWin(); // Synthesized fanfare + haptic feedback
 
         onSpinComplete?.(winningSegment.text);
         setIsSpinning(false);
-    }, [isSpinning, segments, soundEnabled, controls, onSpinComplete]);
+    }, [isSpinning, segments, playTick, playWin, controls, onSpinComplete]);
 
     // Handle elimination when winner modal is closed
     const handleCloseWinner = () => {
@@ -143,6 +145,51 @@ export default function Wheel({
             setShowToast(true);
         }
         setWinner(null);
+    };
+
+    // Social sharing functions
+    const generateShareMessage = () => {
+        if (!winner) return '';
+        const url = typeof window !== 'undefined' ? window.location.href : '';
+        return `I just got ${winner} on LuckyGen! 🎰 Can you beat my luck? Try here: ${url}`;
+    };
+
+    const handleShareWhatsApp = () => {
+        const message = generateShareMessage();
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    };
+
+    const handleShareTwitter = () => {
+        const message = generateShareMessage();
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
+        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+    };
+
+    const handleCopyToClipboard = async () => {
+        const message = generateShareMessage();
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(message);
+                setToastMessage('Copied to clipboard! 📋');
+                setShowToast(true);
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = message;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                setToastMessage('Copied to clipboard! 📋');
+                setShowToast(true);
+            }
+        } catch (err) {
+            setToastMessage('Failed to copy to clipboard');
+            setShowToast(true);
+        }
     };
 
     const segmentAngle = 360 / (segments.length || 1);
@@ -346,9 +393,59 @@ export default function Wheel({
                     <p className="text-white text-center text-2xl font-bold mb-4">
                         {isUltimateWinner ? '👑 ULTIMATE WINNER! 👑' : '🎉 Winner! 🎉'}
                     </p>
-                    <p className="text-white text-center text-3xl font-bold mb-4">
+                    <p className="text-white text-center text-3xl font-bold mb-6">
                         {winner}
                     </p>
+
+                    {/* Social Sharing Buttons */}
+                    <div className="mb-4 space-y-2">
+                        <p className="text-white/80 text-center text-sm font-medium mb-2">Share your result:</p>
+                        <div className="flex gap-2 justify-center">
+                            {/* WhatsApp Share */}
+                            <button
+                                onClick={handleShareWhatsApp}
+                                className="flex-1 px-4 py-3 bg-[#25D366] hover:bg-[#20BD5C] rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                                title="Share on WhatsApp"
+                            >
+                                <Share2 size={18} />
+                                <span className="hidden sm:inline">WhatsApp</span>
+                            </button>
+
+                            {/* Twitter Share */}
+                            <button
+                                onClick={handleShareTwitter}
+                                className="flex-1 px-4 py-3 bg-[#1DA1F2] hover:bg-[#1A8CD8] rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                                title="Share on Twitter"
+                            >
+                                <Share2 size={18} />
+                                <span className="hidden sm:inline">Twitter</span>
+                            </button>
+
+                            {/* Copy to Clipboard */}
+                            <button
+                                onClick={handleCopyToClipboard}
+                                className="flex-1 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                                title="Copy to clipboard"
+                            >
+                                <Copy size={18} />
+                                <span className="hidden sm:inline">Copy</span>
+                            </button>
+                        </div>
+
+                        {/* Embed Code Button - Only show if slug is provided */}
+                        {slug && (
+                            <button
+                                onClick={() => setEmbedModalOpen(true)}
+                                className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                                title="Get Embed Code"
+                            >
+                                <Code size={18} />
+                                <span>Get Embed Code</span>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Close/Elimination Button */}
                     <button
                         onClick={handleCloseWinner}
                         className="w-full px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
@@ -365,6 +462,16 @@ export default function Wheel({
                 onClose={() => setShowToast(false)}
                 type="success"
             />
+
+            {/* Embed Code Modal */}
+            {slug && wheelTitle && (
+                <EmbedCodeModal
+                    isOpen={embedModalOpen}
+                    onClose={() => setEmbedModalOpen(false)}
+                    slug={slug}
+                    title={wheelTitle}
+                />
+            )}
 
         </div>
     );

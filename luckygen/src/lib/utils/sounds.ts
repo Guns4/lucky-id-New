@@ -1,9 +1,17 @@
+/**
+ * @deprecated This file is deprecated in favor of the Web Audio API implementation.
+ * Use `@/hooks/useWheelSound` instead for synthesized audio (no MP3 files needed).
+ * 
+ * This file is kept for backward compatibility only.
+ * Migration guide: Replace `soundManager.playTick()` with `playTick()` from useWheelSound hook.
+ */
+
 export const SOUNDS = {
-    // Short mechanical click
-    TICK: 'https://cdn.freesound.org/previews/256/256113_3263906-lq.mp3',
-    // Success chime/fanfare
-    WIN: 'https://cdn.freesound.org/previews/270/270402_5123851-lq.mp3',
-    // Elimination glitch/bonk
+    // Short mechanical click - using local file
+    TICK: '/sounds/tick.mp3',
+    // Success chime/fanfare - using local file
+    WIN: '/sounds/win.mp3',
+    // Elimination glitch/bonk (fallback to CDN if local file not available)
     ELIMINATE: 'https://cdn.freesound.org/previews/415/415209_5121236-lq.mp3'
 };
 

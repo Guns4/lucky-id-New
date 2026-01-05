@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "LuckyGen - Random Wheel Spinner & Decision Maker",
   description: "Free online spinning wheel for making random decisions. Create custom wheels, spin to decide, and share with friends!",
   metadataBase: new URL('https://luckygen.click'),
+  other: {
+    "google-adsense-account": "ca-pub-5099892029462046"
+  }
 };
 
 export default function RootLayout({

@@ -35,9 +35,10 @@ export default function RootLayout({
 
         {/* Google AdSense - Loaded after page becomes interactive */}
         <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          strategy="afterInteractive"
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099892029462046"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
       </body>
     </html>

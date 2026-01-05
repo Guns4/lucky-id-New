@@ -69,18 +69,25 @@ export default function Wheel({
         const fullSpins = 3 + Math.random() * 2;
         const totalRotation = 360 * fullSpins + targetRotation;
 
-        let lastTick = 0;
-        const tickThreshold = 360 / (segments.length || 1);
+        // Track which segment is at the pointer to sync tick sounds perfectly
+        let lastSegmentIndex = -1;
+        const segmentCount = segments.length || 1;
 
         await animate(rotation, totalRotation, {
             duration: 4,
             ease: [0.25, 0.1, 0.25, 1], // Custom easing for natural slowdown
             onUpdate: (latest) => {
-                // Play tick sound if passed a segment threshold
-                // We use modular arithmetic difference
-                if (Math.abs(latest - lastTick) >= tickThreshold) {
+                // Calculate which segment is currently at the pointer (top of wheel)
+                // Normalize rotation to 0-360 range
+                const normalizedRotation = ((latest % 360) + 360) % 360;
+                // The pointer is at the top (0°), segments start from -90° offset
+                // Calculate which segment index is at the pointer
+                const currentSegmentIndex = Math.floor(normalizedRotation / (360 / segmentCount)) % segmentCount;
+
+                // Play tick only when a NEW segment reaches the pointer
+                if (currentSegmentIndex !== lastSegmentIndex) {
                     playTick(); // Synthesized sound + haptic feedback
-                    lastTick = latest;
+                    lastSegmentIndex = currentSegmentIndex;
                 }
             },
             onComplete: () => {

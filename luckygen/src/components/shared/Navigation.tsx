@@ -62,11 +62,15 @@ export default function Navigation() {
                         <div className="flex items-center gap-8">
                             {/* Logo */}
                             <Link href="/" className="flex items-center gap-3 group">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
-                                    <span className="text-white text-xl font-bold">🎡</span>
+                                <div className="relative w-10 h-10 transition-transform duration-300 group-hover:scale-105">
+                                    <img
+                                        src="/ageinfo-logo.png"
+                                        alt="AgeInfo Logo"
+                                        className="w-full h-full object-contain drop-shadow-md"
+                                    />
                                 </div>
                                 <span className="font-bold text-xl text-gray-900 hidden sm:inline-block group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all duration-300">
-                                    LuckyGen
+                                    AgeInfo
                                 </span>
                             </Link>
 

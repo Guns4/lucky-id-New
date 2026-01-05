@@ -4,144 +4,91 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useWheelStore } from '@/lib/store/wheelStore';
 
 /**
- * Custom hook for synthesized audio using Web Audio API
- * No external MP3 files needed - all sounds are generated programmatically
+ * Custom hook for MP3 audio playback
+ * Uses HTML5 Audio elements to play sound files from /public/sounds/
  */
 export function useWheelSound() {
     const { soundEnabled, toggleSound } = useWheelStore();
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const isInitializedRef = useRef(false);
+    const tickAudioRef = useRef<HTMLAudioElement | null>(null);
+    const winAudioRef = useRef<HTMLAudioElement | null>(null);
+    const spinAudioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Initialize AudioContext on mount
+    // Initialize audio elements on mount
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        // Create AudioContext (with webkit prefix for Safari)
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContextClass) return;
+        // Create audio elements
+        tickAudioRef.current = new Audio('/sounds/tick.mp3');
+        winAudioRef.current = new Audio('/sounds/win.mp3');
+        spinAudioRef.current = new Audio('/sounds/spin.mp3');
 
-        audioContextRef.current = new AudioContextClass();
+        // Preload audio files
+        tickAudioRef.current.preload = 'auto';
+        winAudioRef.current.preload = 'auto';
+        spinAudioRef.current.preload = 'auto';
 
-        // Handle autoplay policy - resume on first user interaction
-        const resumeAudio = () => {
-            if (audioContextRef.current?.state === 'suspended') {
-                audioContextRef.current.resume();
-            }
-            if (!isInitializedRef.current) {
-                isInitializedRef.current = true;
-            }
-        };
+        // Set volumes
+        tickAudioRef.current.volume = 0.3;
+        winAudioRef.current.volume = 0.5;
+        spinAudioRef.current.volume = 0.4;
 
-        // Listen for user interactions
-        const events = ['click', 'touchstart', 'keydown'];
-        events.forEach(event => {
-            document.addEventListener(event, resumeAudio, { once: true });
-        });
-
+        // Cleanup
         return () => {
-            // Cleanup
-            events.forEach(event => {
-                document.removeEventListener(event, resumeAudio);
-            });
-            audioContextRef.current?.close();
+            tickAudioRef.current = null;
+            winAudioRef.current = null;
+            spinAudioRef.current = null;
         };
     }, []);
 
     /**
-     * Play a short "tick" sound using an oscillator
-     * Simulates a plastic click with a frequency sweep
-     * Also triggers haptic feedback on mobile devices
+     * Play a short "tick" sound
+     * Used when wheel passes each segment
      */
     const playTick = useCallback(() => {
-        if (!soundEnabled || !audioContextRef.current) return;
-
-        const audioContext = audioContextRef.current;
-
-        // Ensure AudioContext is running
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+        if (!soundEnabled || !tickAudioRef.current) return;
 
         try {
-            // Create oscillator node for tone generation
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            // Reset audio to beginning
+            tickAudioRef.current.currentTime = 0;
 
-            // Connect nodes: Oscillator -> Gain -> Destination (speakers)
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            // Play the sound
+            const playPromise = tickAudioRef.current.play();
 
-            // Configure oscillator
-            oscillator.type = 'triangle'; // Softer than square, more interesting than sine
-
-            // Frequency sweep: 800Hz → 200Hz (creates "click" effect)
-            const now = audioContext.currentTime;
-            oscillator.frequency.setValueAtTime(800, now);
-            oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.05);
-
-            // Volume envelope: Quick attack, exponential decay
-            gainNode.gain.setValueAtTime(0.3, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-
-            // Play for 50ms
-            oscillator.start(now);
-            oscillator.stop(now + 0.05);
+            // Handle promise (required for some browsers)
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Tick sound play failed:', error);
+                });
+            }
 
             // Haptic feedback (mobile only)
             if (navigator.vibrate) {
                 navigator.vibrate(5); // 5ms vibration
             }
         } catch (error) {
-            // Silent fail for browser compatibility
             console.warn('Failed to play tick sound:', error);
         }
     }, [soundEnabled]);
 
     /**
-     * Play a "win" fanfare sound using multiple oscillators
-     * Creates a major chord progression (C-E-G) for a celebratory feel
+     * Play a "win" fanfare sound
+     * Used when wheel stops on the winner
      */
     const playWin = useCallback(() => {
-        if (!soundEnabled || !audioContextRef.current) return;
-
-        const audioContext = audioContextRef.current;
-
-        // Ensure AudioContext is running
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+        if (!soundEnabled || !winAudioRef.current) return;
 
         try {
-            // Major chord: C5, E5, G5 (frequencies in Hz)
-            const notes = [
-                { freq: 523.25, delay: 0 },      // C5
-                { freq: 659.25, delay: 0.1 },    // E5
-                { freq: 783.99, delay: 0.2 },    // G5
-                { freq: 1046.50, delay: 0.3 }    // C6 (octave up for finale)
-            ];
+            // Reset audio to beginning
+            winAudioRef.current.currentTime = 0;
 
-            const duration = 0.5;
+            // Play the sound
+            const playPromise = winAudioRef.current.play();
 
-            notes.forEach(({ freq, delay }) => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                // Use sine wave for smooth, pleasant tone
-                oscillator.type = 'sine';
-                oscillator.frequency.value = freq;
-
-                const startTime = audioContext.currentTime + delay;
-
-                // Volume envelope
-                gainNode.gain.setValueAtTime(0.4, startTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-
-                oscillator.start(startTime);
-                oscillator.stop(startTime + duration);
-            });
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Win sound play failed:', error);
+                });
+            }
 
             // Longer haptic feedback for win
             if (navigator.vibrate) {
@@ -153,40 +100,25 @@ export function useWheelSound() {
     }, [soundEnabled]);
 
     /**
-     * Play an elimination sound (glitch effect)
-     * Uses noise-like oscillator with rapid frequency modulation
+     * Play an elimination sound
+     * Used in elimination mode when a segment is removed
      */
     const playEliminate = useCallback(() => {
-        if (!soundEnabled || !audioContextRef.current) return;
-
-        const audioContext = audioContextRef.current;
-
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
+        if (!soundEnabled || !tickAudioRef.current) return;
 
         try {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            // Use tick sound but with different playback rate for variation
+            const audio = tickAudioRef.current.cloneNode() as HTMLAudioElement;
+            audio.volume = 0.2;
+            audio.playbackRate = 0.7; // Slower playback for elimination effect
 
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            const playPromise = audio.play();
 
-            // Square wave for harsh, digital sound
-            oscillator.type = 'square';
-
-            const now = audioContext.currentTime;
-
-            // Descending pitch for "falling" effect
-            oscillator.frequency.setValueAtTime(400, now);
-            oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.3);
-
-            // Quick fade out
-            gainNode.gain.setValueAtTime(0.2, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-
-            oscillator.start(now);
-            oscillator.stop(now + 0.3);
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Eliminate sound play failed:', error);
+                });
+            }
 
             // Harsh vibration for elimination
             if (navigator.vibrate) {
@@ -197,10 +129,50 @@ export function useWheelSound() {
         }
     }, [soundEnabled]);
 
+    /**
+     * Play continuous spin sound (optional)
+     * Used during wheel spinning
+     */
+    const playSpinLoop = useCallback(() => {
+        if (!soundEnabled || !spinAudioRef.current) return;
+
+        try {
+            spinAudioRef.current.currentTime = 0;
+            spinAudioRef.current.loop = true;
+
+            const playPromise = spinAudioRef.current.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.warn('Spin sound play failed:', error);
+                });
+            }
+        } catch (error) {
+            console.warn('Failed to play spin sound:', error);
+        }
+    }, [soundEnabled]);
+
+    /**
+     * Stop continuous spin sound
+     */
+    const stopSpinLoop = useCallback(() => {
+        if (!spinAudioRef.current) return;
+
+        try {
+            spinAudioRef.current.pause();
+            spinAudioRef.current.currentTime = 0;
+            spinAudioRef.current.loop = false;
+        } catch (error) {
+            console.warn('Failed to stop spin sound:', error);
+        }
+    }, []);
+
     return {
         playTick,
         playWin,
         playEliminate,
+        playSpinLoop,
+        stopSpinLoop,
         enabled: soundEnabled,
         toggleSound
     };

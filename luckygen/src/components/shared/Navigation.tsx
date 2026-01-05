@@ -1,22 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AuthButton from '@/components/auth/AuthButton';
 import LoginModal from '@/components/auth/LoginModal';
 import { Menu, X, Compass, Home, LayoutDashboard } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function Navigation() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [loginModalOpen, setLoginModalOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const pathname = usePathname();
+    const supabase = createClient();
 
-    const navLinks = [
+    // Check auth state
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setIsLoggedIn(!!user);
+        };
+
+        checkAuth();
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setIsLoggedIn(!!session?.user);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
+
+    // Base navigation links
+    const baseNavLinks = [
         { href: '/', label: 'Home', icon: Home },
         { href: '/explore', label: 'Explore', icon: Compass },
-        { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ];
+
+    // Add Dashboard only if logged in
+    const navLinks = isLoggedIn
+        ? [...baseNavLinks, { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }]
+        : baseNavLinks;
 
     const isActive = (href: string) => {
         if (href === '/') {
@@ -50,8 +75,8 @@ export default function Navigation() {
                                         key={link.href}
                                         href={link.href}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${active
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                     >
                                         <Icon size={18} />
@@ -94,8 +119,8 @@ export default function Navigation() {
                                         href={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${active
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                     >
                                         <Icon size={20} />

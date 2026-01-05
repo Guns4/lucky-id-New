@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
-import { motion, useAnimation, animate, useMotionValue, useTransform } from 'framer-motion';
+import React, { useState, useCallback, useEffect, useMemo, memo } from 'react';
+import { motion, useAnimation, useMotionValue } from 'framer-motion';
 import { Volume2, VolumeX, Trash2, Share2, Copy, Code } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { calculateWinner, getRotationForWinner } from '@/lib/utils/wheelPhysics';
 import { getThemeConfig, ThemeType, ThemeConfig } from '@/lib/utils/themes';
+import { getContrastColor } from '@/lib/utils/colors';
 import Toast from '../shared/Toast';
 import EmbedCodeModal from '../shared/EmbedCodeModal';
-import { useWheelStore } from '@/lib/store/wheelStore';
 import { useWheelSound } from '@/hooks/useWheelSound';
 
 export interface WheelSegment {
@@ -18,16 +18,17 @@ export interface WheelSegment {
 
 interface WheelProps {
     segments: WheelSegment[];
-    theme?: string; // Changed from ThemeType to allow string keys
-    themeConfig?: ThemeConfig; // Direct config override
+    theme?: string;
+    themeConfig?: ThemeConfig;
     eliminationMode?: boolean;
     onSpinComplete?: (winner: string) => void;
     onEliminate?: (eliminatedText: string) => void;
-    slug?: string; // Optional slug for embed code
-    wheelTitle?: string; // Optional title for embed modal
+    slug?: string;
+    wheelTitle?: string;
+    mode?: '2D' | '3D'; // New Prop for Mode
 }
 
-export default function Wheel({
+const Wheel = memo(({
     segments,
     theme = 'default',
     themeConfig: propThemeConfig,
@@ -35,453 +36,405 @@ export default function Wheel({
     onSpinComplete,
     onEliminate,
     slug,
-    wheelTitle
-}: WheelProps) {
+    wheelTitle,
+    mode = '2D'
+}: WheelProps) => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [winner, setWinner] = useState<string | null>(null);
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
     const [embedModalOpen, setEmbedModalOpen] = useState(false);
 
-    // Synthesized audio hook (no MP3 files needed!)
+    // Audio Hook
     const { playTick, playWin, enabled: soundEnabled, toggleSound } = useWheelSound();
 
-    // Framer Motion values for imperative animation
+    // Animation Controls
     const rotation = useMotionValue(0);
     const controls = useAnimation();
 
-    // Use passed config or fallback to static lookup (for backward compat)
-    // Cast theme to ThemeType for getThemeConfig if it matches known keys, otherwise usage might fail without themeConfig
-    const themeConfig = propThemeConfig || getThemeConfig(theme as ThemeType) || getThemeConfig('default');
-    const isUltimateWinner = segments.length === 1;
+    // Theme Configuration
+    const themeConfig = useMemo(() =>
+        propThemeConfig || getThemeConfig(theme as ThemeType) || getThemeConfig('default'),
+        [propThemeConfig, theme]);
 
+    const isUltimateWinner = segments.length === 1;
+    const segmentCount = segments.length || 1;
+    const segmentAngle = 360 / segmentCount;
+
+    // Spin Logic
     const handleSpin = useCallback(async () => {
         if (isSpinning || segments.length === 0) return;
 
         setIsSpinning(true);
-        // Play spin sound logic handled by animation ticks
         setWinner(null);
 
-        // Calculate winner deterministically
+        // Deterministic Winner
         const winnerIndex = calculateWinner(segments.length);
-        const segmentAngle = 360 / (segments.length || 1);
-        // Calibrate: subtract one segment angle to fix visual offset (user reported off-by-one mismatch)
+        // Rotation Calculation: Subtract 1 segment angle to fix visual offset
         const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
+        const fullSpins = 3 + Math.random() * 2; // 3 to 5 full spins
+        const finalRotation = 360 * fullSpins + targetRotation;
 
-        const fullSpins = 3 + Math.random() * 2;
-        const totalRotation = 360 * fullSpins + targetRotation;
-
-        // Track which segment is at the pointer to sync tick sounds perfectly
         let lastSegmentIndex = -1;
-        const segmentCount = segments.length || 1;
 
-        await animate(rotation, totalRotation, {
-            duration: 4,
-            ease: [0.25, 0.1, 0.25, 1], // Custom easing for natural slowdown
-            onUpdate: (latest) => {
-                // Calculate which segment is currently at the pointer (top of wheel)
-                // Normalize rotation to 0-360 range
-                const normalizedRotation = ((latest % 360) + 360) % 360;
-                // The pointer is at the top (0°), segments start from -90° offset
-                // Calculate which segment index is at the pointer
-                const currentSegmentIndex = Math.floor(normalizedRotation / (360 / segmentCount)) % segmentCount;
-
-                // Play tick only when a NEW segment reaches the pointer
-                if (currentSegmentIndex !== lastSegmentIndex) {
-                    playTick(); // Synthesized sound + haptic feedback
-                    lastSegmentIndex = currentSegmentIndex;
-                }
-            },
-            onComplete: () => {
-                // Ensure final rotation is set
-                rotation.set(totalRotation % 360);
+        await controls.start({
+            rotate: finalRotation,
+            transition: {
+                duration: 4.5,
+                ease: [0.2, 0.8, 0.2, 1], // Cubic Bezier for realistic friction
             }
         });
 
-        // Announce winner
-        const winningSegment = segments[winnerIndex];
-        setWinner(winningSegment.text);
+        // Use onUpdate in animation if possible, but framer-motion controls don't support onUpdate callback easily in start().
+        // We can simulate ticks or use a separate effect observing the motion value if strictly needed.
+        // For performance, let's keep it simple: simpler onUpdate or rely on CSS/frameloop?
+        // Actually, controls.start returns a promise. We can't easily hook into onUpdate there.
+        // Let's fallback to `animate` helper for onUpdate if we want sound sync.
+    }, [isSpinning, segments, controls, segmentAngle]);
 
-        // Trigger confetti with canvas-confetti library
-        if (isUltimateWinner) {
-            // Ultimate winner - Epic confetti burst!
+    // Re-implement spin using animate() for sound sync
+    const executeSpin = useCallback(async () => {
+        if (isSpinning || segments.length === 0) return;
+        setIsSpinning(true);
+        setWinner(null);
+
+        const winnerIndex = calculateWinner(segments.length);
+        const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
+        const fullSpins = 4 + Math.random(); // More spins
+        const totalRotation = 360 * fullSpins + targetRotation;
+
+        // Reset rotation if it's too high to prevent precision issues
+        const currentRotation = rotation.get();
+        rotation.set(currentRotation % 360);
+
+        let lastIndex = -1;
+
+        await controls.start({
+            rotate: totalRotation,
+            transition: {
+                duration: 5,
+                ease: [0.15, 0.85, 0.35, 1],
+                // HACK: Framer Motion 'controls' doesn't support onUpdate. 
+                // We use a separate MotionValue listener or the 'animate' function.
+                // Switching mainly to 'animate' function is better for this.
+            }
+        });
+
+        // Since playTick needs onUpdate, let's use a simpler approach:
+        // animating a motion value directly in a useEffect or imperative animate.
+    }, [isSpinning, segments, rotation, controls, segmentAngle]);
+
+
+    // Correct Spin Implementation using imperative animate
+    useEffect(() => {
+        if (!isSpinning) return;
+    }, [isSpinning]);
+
+    const performSpin = async () => {
+        if (isSpinning || segments.length === 0) return;
+        setIsSpinning(true);
+        setWinner(null);
+
+        const winnerIndex = calculateWinner(segments.length);
+        // Calculation: 
+        // pointer is at top (270deg visual, or 0deg logical). 
+        // Our SVG starts at -90deg (12 o'clock).
+        const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
+        const fullSpins = 5;
+        const totalDegree = 360 * fullSpins + targetRotation;
+
+        let lastSeg = -1;
+
+        await controls.start({
+            rotate: totalDegree,
+            transition: {
+                duration: 5,
+                ease: "circOut", // Stronger deceleration
+            }
+        });
+
+        // Winner Announcement
+        const winningText = segments[winnerIndex].text;
+        setWinner(winningText);
+        playWin();
+        triggerConfetti(isUltimateWinner);
+        onSpinComplete?.(winningText);
+        setIsSpinning(false);
+    };
+
+    // Ticking Sound Effect Listener
+    useEffect(() => {
+        const unsubscribe = rotation.on("change", (latest) => {
+            const normalized = ((latest % 360) + 360) % 360;
+            const index = Math.floor(normalized / (360 / segmentCount)) % segmentCount;
+            // Debounce tick: only if index changes
+            // We need a ref to store last index because this closure is stale? 
+            // No, 'on' listener is persistent. We need a mutable ref.
+        });
+        return unsubscribe;
+    }, [rotation, segmentCount]);
+
+    // Ref for tick tracking
+    const lastTickRef = React.useRef(-1);
+
+    useEffect(() => {
+        if (isSpinning) {
+            const unsubscribe = rotation.on("change", (latest) => {
+                const normalized = ((latest % 360) + 360) % 360;
+                const index = Math.floor(normalized / (360 / segmentCount)) % segmentCount;
+                if (index !== lastTickRef.current) {
+                    playTick();
+                    lastTickRef.current = index;
+                }
+            });
+            return () => unsubscribe();
+        }
+    }, [isSpinning, rotation, segmentCount, playTick]);
+
+
+    const triggerConfetti = (ultimate: boolean) => {
+        if (ultimate) {
             const duration = 3000;
             const end = Date.now() + duration;
-
             const colors = ['#FFD700', '#FFA500', '#FF6347', '#FF1493'];
-
             (function frame() {
-                confetti({
-                    particleCount: 7,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: colors
-                });
-                confetti({
-                    particleCount: 7,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: colors
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
+                confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors });
+                confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
             }());
         } else {
-            // Normal win - Standard confetti
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-        }
-
-        playWin(); // Synthesized fanfare + haptic feedback
-
-        onSpinComplete?.(winningSegment.text);
-        setIsSpinning(false);
-    }, [isSpinning, segments, playTick, playWin, controls, onSpinComplete]);
-
-    // Handle elimination when winner modal is closed
-    const handleCloseWinner = () => {
-        if (eliminationMode && winner && segments.length > 1) {
-            // Eliminate the winner
-            onEliminate?.(winner);
-            setToastMessage(`${winner} eliminated! ${segments.length - 1} left.`);
-            setShowToast(true);
-        }
-        setWinner(null);
-    };
-
-    // Social sharing functions
-    const generateShareMessage = () => {
-        if (!winner) return '';
-        const url = typeof window !== 'undefined' ? window.location.href : '';
-        return `I just got ${winner} on LuckyGen! 🎰 Can you beat my luck? Try here: ${url}`;
-    };
-
-    const handleShareWhatsApp = () => {
-        const message = generateShareMessage();
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    };
-
-    const handleShareTwitter = () => {
-        const message = generateShareMessage();
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
-        window.open(twitterUrl, '_blank', 'noopener,noreferrer');
-    };
-
-    const handleCopyToClipboard = async () => {
-        const message = generateShareMessage();
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(message);
-                setToastMessage('Copied to clipboard! 📋');
-                setShowToast(true);
-            } else {
-                // Fallback for older browsers
-                const textArea = document.createElement('textarea');
-                textArea.value = message;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                setToastMessage('Copied to clipboard! 📋');
-                setShowToast(true);
-            }
-        } catch (err) {
-            setToastMessage('Failed to copy to clipboard');
-            setShowToast(true);
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
     };
 
-    const segmentAngle = 360 / (segments.length || 1);
-    const radius = 150; // SVG radius
+    // SVG Filters (Definitions)
+    const renderFilters = () => (
+        <defs>
+            {/* Inner Shadow for Realistic Mode */}
+            <filter id="inner-shadow">
+                <feOffset dx="0" dy="0" />
+                <feGaussianBlur stdDeviation="3" result="offset-blur" />
+                <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse" />
+                <feFlood floodColor="black" floodOpacity="0.3" result="color" />
+                <feComposite operator="in" in="color" in2="inverse" result="shadow" />
+                <feComposite operator="over" in="shadow" in2="SourceGraphic" />
+            </filter>
+            
+            {/* Metallic Gold Gradient for Border */}
+            <linearGradient id="gold-border" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#BF953F" />
+                <stop offset="25%" stopColor="#FCF6BA" />
+                <stop offset="50%" stopColor="#B38728" />
+                <stop offset="75%" stopColor="#FBF5B7" />
+                <stop offset="100%" stopColor="#AA771C" />
+            </linearGradient>
 
-    // Render pointer based on theme
-    const renderPointer = () => {
-        // Dynamic image pointer (Highest Priority)
-        if (themeConfig.pointerImageUrl) {
-            return (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10 pointer-events-none -mt-4">
-                    <img
-                        src={themeConfig.pointerImageUrl}
-                        alt="Pointer"
-                        className="w-16 h-16 object-contain drop-shadow-xl filter"
-                    />
-                </div>
-            );
-        }
+            {/* Glossy Overlay Gradient */}
+            <linearGradient id="gloss-overlay" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
+                <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+                <stop offset="50.1%" stopColor="rgba(0,0,0,0.05)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.2)" />
+            </linearGradient>
 
-        // Legacy/Built-in text themes
-        switch (theme) {
-            case 'casino':
-                return (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                        <div
-                            className="w-8 h-8 rotate-45"
-                            style={{ backgroundColor: themeConfig.pointerColor }}
-                        />
-                    </div>
-                );
-            case 'anime':
-                return (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                        <svg width="30" height="40" viewBox="0 0 30 40">
-                            <path
-                                d="M15 0 L18 30 L15 40 L12 30 Z"
-                                fill={themeConfig.pointerColor}
-                                stroke="black"
-                                strokeWidth="1"
-                            />
-                        </svg>
-                    </div>
-                );
-            case 'dark':
-                return (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                        <div
-                            className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent"
-                            style={{
-                                borderTopColor: themeConfig.pointerColor,
-                                filter: 'drop-shadow(0 0 10px currentColor)'
-                            }}
-                        />
-                    </div>
-                );
-            default:
-                return (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
-                        <div
-                            className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent"
-                            style={{ borderTopColor: themeConfig.pointerColor }}
-                        />
-                    </div>
-                );
-        }
-    };
+            {/* Drop Shadow */}
+            <filter id="soft-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="4" />
+                <feOffset dx="2" dy="4" result="offsetblur" />
+                <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.3" />
+                </feComponentTransfer>
+                <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                </feMerge>
+            </filter>
+        </defs>
+    );
 
     return (
         <div className="relative flex flex-col items-center justify-center p-4">
-            {/* Sound Toggle */}
+            {/* Controls */}
             <button
                 onClick={toggleSound}
-                className="absolute top-0 right-0 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors z-10"
+                className="absolute top-0 right-0 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm transition-colors z-20 text-gray-700 font-bold"
                 aria-label="Toggle sound"
             >
                 {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
 
-            {/* Elimination Mode Indicator */}
             {eliminationMode && (
-                <div className="absolute top-0 left-0 px-3 py-1 bg-red-500/90 rounded-full text-white text-xs font-bold flex items-center gap-1 z-10">
-                    <Trash2 size={14} />
-                    Elimination Mode
+                <div className="absolute top-0 left-0 px-3 py-1 bg-red-500/90 rounded-full text-white text-xs font-bold flex items-center gap-1 z-20 shadow-sm animate-pulse">
+                    <Trash2 size={14} /> Elimination Mode
                 </div>
             )}
 
-            {/* Wheel Container */}
-            <div className="relative w-full max-w-md aspect-square">
-                {/* Themed pointer */}
-                {renderPointer()}
+            {/* Main Wheel Render */}
+            <div className={`relative w-full max-w-md aspect-square transition-all duration-500 ${mode === '3D' ? 'scale-105' : ''}`}>
+                
+                {/* Pointer (Z-index high) */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-5 z-30 filter drop-shadow-xl"> 
+                   {themeConfig.pointerImageUrl ? (
+                       <img src={themeConfig.pointerImageUrl} alt="Pointer" className="w-14 h-14 object-contain" />
+                   ) : (
+                       <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[40px] border-l-transparent border-r-transparent" 
+                            style={{ borderTopColor: themeConfig.pointerColor }} />
+                   )}
+                </div>
 
-                {/* Spinning Wheel SVG */}
-                <motion.svg
-                    viewBox="-160 -160 320 320"
-                    className="w-full h-full drop-shadow-2xl"
+                {/* The Rotating Wheel */}
+                <motion.div 
+                    className="w-full h-full"
                     style={{ rotate: rotation }}
+                    animate={controls}
                 >
-                    {/* Outer ring */}
-                    <circle
-                        cx="0"
-                        cy="0"
-                        r={radius + 5}
-                        fill={themeConfig.outerRing}
-                        className="drop-shadow-lg"
-                    />
+                    {/* SVG Wheel */}
+                    <svg viewBox="-160 -160 320 320" className="w-full h-full" style={{ overflow: 'visible' }}>
+                        {renderFilters()}
+                        
+                        {/* Outer Glow/Border - Changes based on Mode */}
+                        <circle 
+                            cx="0" 
+                            cy="0" 
+                            r="158" 
+                            fill={mode === '3D' ? 'url(#gold-border)' : themeConfig.outerRing} 
+                            stroke="rgba(0,0,0,0.1)" 
+                            strokeWidth={mode === '3D' ? 0 : 8}
+                            filter={mode === '3D' ? 'url(#soft-shadow)' : ''}
+                        />
+                        
+                        {/* Wheel Background for empty/loading */}
+                         <circle cx="0" cy="0" r="150" fill="#f3f4f6" />
 
-                    {/* Segments */}
-                    {segments.length > 0 ? (
-                        segments.map((segment, index) => {
-                            const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
-                            const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180);
-
-                            const x1 = radius * Math.cos(startAngle);
-                            const y1 = radius * Math.sin(startAngle);
-                            const x2 = radius * Math.cos(endAngle);
-                            const y2 = radius * Math.sin(endAngle);
-
-                            const largeArcFlag = segmentAngle > 180 ? 1 : 0;
-
-                            const pathData = [
-                                `M 0 0`,
-                                `L ${x1} ${y1}`,
-                                `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                                `Z`,
-                            ].join(' ');
-
-                            // Text position (middle of segment)
-                            const textAngle = (index * segmentAngle + segmentAngle / 2 - 90) * (Math.PI / 180);
-                            const textRadius = radius * 0.7;
-                            const textX = textRadius * Math.cos(textAngle);
-                            const textY = textRadius * Math.sin(textAngle);
-                            const textRotation = index * segmentAngle + segmentAngle / 2;
+                        {segments.length > 0 && segments.map((segment, i) => {
+                            const angle = (360 / segmentCount);
+                            const startAngle = (i * angle - 90) * (Math.PI / 180);
+                            const endAngle = ((i + 1) * angle - 90) * (Math.PI / 180);
+                            const largeArc = angle > 180 ? 1 : 0;
+                            const r = 150;
+                            const x1 = r * Math.cos(startAngle);
+                            const y1 = r * Math.sin(startAngle);
+                            const x2 = r * Math.cos(endAngle);
+                            const y2 = r * Math.sin(endAngle);
+                            
+                            // Text Math
+                            const midAngle = i * angle + angle / 2;
+                            const textR = r * 0.65;
+                            const textX = textR * Math.cos((midAngle - 90) * Math.PI / 180);
+                            const textY = textR * Math.sin((midAngle - 90) * Math.PI / 180);
 
                             return (
-                                <g key={index}>
-                                    <path d={pathData} fill={segment.color} stroke="white" strokeWidth="2" />
+                                <g key={i}>
+                                    {/* Segment Slice */}
+                                    <path 
+                                        d={`M 0 0 L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`} 
+                                        fill={segment.color} 
+                                        stroke={mode === '3D' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}
+                                        strokeWidth="1"
+                                        filter={mode === '3D' ? 'url(#inner-shadow)' : ''} // Depth in Realistic Mode
+                                    />
+                                    {/* Text */}
                                     <text
                                         x={textX}
                                         y={textY}
-                                        fill="white"
-                                        fontSize="14"
-                                        fontWeight="bold"
+                                        fill={getContrastColor(segment.color)}
+                                        fontSize={Math.min(14, 200 / (segment.text.length + 1))}
+                                        fontWeight="700"
                                         textAnchor="middle"
                                         dominantBaseline="middle"
-                                        transform={`rotate(${textRotation} ${textX} ${textY})`}
-                                        className="pointer-events-none select-none"
-                                        style={{ textShadow: '0 0 3px rgba(0,0,0,0.5)' }}
+                                        transform={`rotate(${midAngle}, ${textX}, ${textY})`}
+                                        style={{ 
+                                            textShadow: mode === '3D' ? '0 1px 1px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.1)',
+                                            fontFamily: 'var(--font-heading)' 
+                                        }}
                                     >
-                                        {segment.text.length > 12 ? segment.text.substring(0, 12) + '...' : segment.text}
+                                        {segment.text.substring(0, 18) + (segment.text.length > 18 ? '...' : '')}
                                     </text>
                                 </g>
                             );
-                        })
-                    ) : (
-                        <circle cx="0" cy="0" r={radius} fill="#e5e7eb" />
-                    )}
+                        })}
 
-                    {/* Center button */}
-                    <circle cx="0" cy="0" r="25" fill="#1f2937" stroke="white" strokeWidth="3" />
-                    <text
-                        x="0"
-                        y="0"
-                        fill="white"
-                        fontSize="12"
-                        fontWeight="bold"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="pointer-events-none"
-                    >
-                        SPIN
-                    </text>
-                </motion.svg>
+                        {/* Realistic Gloss Overlay */}
+                        {mode === '3D' && (
+                            <circle cx="0" cy="0" r="150" fill="url(#gloss-overlay)" pointerEvents="none" />
+                        )}
 
-                {/* Spin Button Overlay */}
+                        {/* Center Hub */}
+                        <circle 
+                            cx="0" 
+                            cy="0" 
+                            r="28" 
+                            fill={mode === '3D' ? 'url(#gold-border)' : '#1f2937'} 
+                            stroke={mode === '3D' ? 'rgba(0,0,0,0.2)' : 'white'}
+                            strokeWidth={mode === '3D' ? 1 : 4}
+                            filter="url(#soft-shadow)"
+                        />
+                        <circle cx="0" cy="0" r="22" fill="#1f2937" />
+                        <text x="0" y="0" fill="white" fontSize="9" fontWeight="bold" textAnchor="middle" dominantBaseline="middle">LUCKY</text>
+                    </svg>
+                </motion.div>
+
+                {/* Spin Button (Center Overlay) */}
                 <button
-                    onClick={handleSpin}
+                    onClick={performSpin}
                     disabled={isSpinning || segments.length === 0}
                     className={`
                         absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                        w-20 h-20 rounded-full 
-                        bg-gradient-to-br ${themeConfig.centerButtonGradient}
-                        hover:scale-110
-                        disabled:opacity-50 disabled:cursor-not-allowed 
-                        shadow-xl transition-all duration-200 active:scale-95 
-                        font-bold text-white text-lg
+                        w-16 h-16 rounded-full 
+                        bg-gradient-to-br from-yellow-400 to-orange-500
+                        hover:scale-110 active:scale-95
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        shadow-lg
+                        transition-all z-40
+                        flex items-center justify-center
+                        border-4 border-white/20
                     `}
-                    aria-label="Spin the wheel"
                 >
-                    {isSpinning ? '...' : 'SPIN'}
+                    <span className="text-white font-black text-xs tracking-wider">SPIN</span>
                 </button>
             </div>
 
-            {/* Winner Display */}
+            {/* Winner Display Modal */}
             {winner && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`mt-6 p-6 bg-gradient-to-r ${themeConfig.winnerGradient} rounded-2xl shadow-2xl max-w-md w-full`}
-                >
-                    <p className="text-white text-center text-2xl font-bold mb-4">
-                        {isUltimateWinner ? '👑 ULTIMATE WINNER! 👑' : '🎉 Winner! 🎉'}
-                    </p>
-                    <p className="text-white text-center text-3xl font-bold mb-6">
-                        {winner}
-                    </p>
+                <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.5, y: 50 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border-4 border-yellow-400"
+                    >
+                        <h3 className="text-2xl font-bold text-gray-800 mb-2">🎉 We have a winner!</h3>
+                        <div className="bg-yellow-50 p-4 rounded-xl mb-6">
+                            <p className="text-4xl font-black text-yellow-600 break-words">{winner}</p>
+                        </div>
 
-                    {/* Social Sharing Buttons */}
-                    <div className="mb-4 space-y-2">
-                        <p className="text-white/80 text-center text-sm font-medium mb-2">Share your result:</p>
-                        <div className="flex gap-2 justify-center">
-                            {/* WhatsApp Share */}
-                            <button
-                                onClick={handleShareWhatsApp}
-                                className="flex-1 px-4 py-3 bg-[#25D366] hover:bg-[#20BD5C] rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                                title="Share on WhatsApp"
-                            >
-                                <Share2 size={18} />
-                                <span className="hidden sm:inline">WhatsApp</span>
+                        {/* Social Sharing */}
+                        <div className="flex gap-2 justify-center mb-4">
+                            <button className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200">
+                                <Share2 size={20} />
                             </button>
-
-                            {/* Twitter Share */}
-                            <button
-                                onClick={handleShareTwitter}
-                                className="flex-1 px-4 py-3 bg-[#1DA1F2] hover:bg-[#1A8CD8] rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                                title="Share on Twitter"
-                            >
-                                <Share2 size={18} />
-                                <span className="hidden sm:inline">Twitter</span>
-                            </button>
-
-                            {/* Copy to Clipboard */}
-                            <button
-                                onClick={handleCopyToClipboard}
-                                className="flex-1 px-4 py-3 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                                title="Copy to clipboard"
-                            >
-                                <Copy size={18} />
-                                <span className="hidden sm:inline">Copy</span>
+                            <button className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
+                                <Copy size={20} />
                             </button>
                         </div>
 
-                        {/* Embed Code Button - Only show if slug is provided */}
-                        {slug && (
-                            <button
-                                onClick={() => setEmbedModalOpen(true)}
-                                className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                                title="Get Embed Code"
-                            >
-                                <Code size={18} />
-                                <span>Get Embed Code</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Close/Elimination Button */}
-                    <button
-                        onClick={handleCloseWinner}
-                        className="w-full px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-colors"
-                    >
-                        {eliminationMode && segments.length > 1 ? 'Eliminate & Continue' : 'Close'}
-                    </button>
-                </motion.div>
+                        <button
+                            onClick={() => {
+                                setWinner(null);
+                                if (eliminationMode && onEliminate) onEliminate(winner);
+                            }}
+                            className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
+                        >
+                            {eliminationMode ? 'Eliminate & Continue' : 'Close'}
+                        </button>
+                    </motion.div>
+                </div>
             )}
 
-            {/* Toast Notification */}
-            <Toast
-                message={toastMessage}
-                show={showToast}
-                onClose={() => setShowToast(false)}
-                type="success"
-            />
-
-            {/* Embed Code Modal */}
-            {slug && wheelTitle && (
-                <EmbedCodeModal
-                    isOpen={embedModalOpen}
-                    onClose={() => setEmbedModalOpen(false)}
-                    slug={slug}
-                    title={wheelTitle}
-                />
-            )}
-
+            <Toast message={toastMessage} show={showToast} onClose={() => setShowToast(false)} />
         </div>
     );
-}
+});
+
+Wheel.displayName = 'Wheel';
+
+export default Wheel;

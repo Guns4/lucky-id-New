@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Shuffle, ArrowDownAZ, Edit3, Settings2, Plus, Trash2, Palette } from 'lucide-react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { Plus, Trash2, Shuffle, ArrowDownAZ, Edit3, Settings2, Palette } from 'lucide-react';
 import { WheelSegment } from '@/lib/store/wheelStore';
-import { ThemeType } from '@/lib/utils/themes';
+import { ThemeType, ThemeConfig } from '@/lib/utils/themes';
 import ThemeSelector from '@/components/wheel/ThemeSelector';
-import { ThemeConfig } from '@/lib/utils/themes';
-import { getRandomColor } from '@/lib/utils/colors';
+import { getRandomColor, getContrastColor } from '@/lib/utils/colors';
 
 interface ControlPanelProps {
     segments: WheelSegment[];
@@ -14,14 +13,72 @@ interface ControlPanelProps {
     addSegment: (segment: WheelSegment) => void;
     removeSegment: (index: number) => void;
     updateSegment: (index: number, updates: Partial<WheelSegment>) => void;
-    theme: ThemeType;
-    setTheme: (theme: ThemeType) => void;
+    theme: string;
+    setTheme: (theme: string) => void;
     eliminationMode: boolean;
     toggleEliminationMode: () => void;
     soundEnabled: boolean;
     toggleSound: () => void;
-    themes?: Record<string, ThemeConfig>;
+    themes: Record<string, ThemeConfig>;
 }
+
+// Optimized Input Component to prevent re-renders on every keystroke
+const DebouncedInput = memo(({
+    value,
+    onChange,
+    placeholder,
+    maxLength,
+    className,
+    style
+}: {
+    value: string,
+    onChange: (val: string) => void,
+    placeholder?: string,
+    maxLength?: number,
+    className?: string,
+    style?: React.CSSProperties
+}) => {
+    const [localValue, setLocalValue] = useState(value);
+
+    // Sync from parent if moved/shuffled
+    useEffect(() => {
+        setLocalValue(value);
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalValue(e.target.value);
+    };
+
+    // Commit on blur
+    const handleBlur = () => {
+        if (localValue !== value) {
+            onChange(localValue);
+        }
+    };
+
+    // Commit on Enter
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.currentTarget.blur();
+        }
+    };
+
+    return (
+        <input
+            type="text"
+            value={localValue}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            className={className}
+            style={style}
+        />
+    );
+});
+
+DebouncedInput.displayName = 'DebouncedInput';
 
 export default function ControlPanel({
     segments,
@@ -43,15 +100,15 @@ export default function ControlPanel({
     const [showBulkEdit, setShowBulkEdit] = useState(false);
 
     // Sync bulk text with segments when opening bulk edit
-    const toggleBulkEdit = () => {
+    const toggleBulkEdit = useCallback(() => {
         if (!showBulkEdit) {
             setBulkText(segments.map(s => s.text).join('\n'));
         }
-        setShowBulkEdit(!showBulkEdit);
-    };
+        setShowBulkEdit(prev => !prev);
+    }, [segments, showBulkEdit]);
 
     // Update segments from bulk textarea
-    const handleBulkUpdate = () => {
+    const handleBulkUpdate = useCallback(() => {
         const lines = bulkText
             .split('\n')
             .map(line => line.trim())
@@ -64,22 +121,22 @@ export default function ControlPanel({
 
         setSegments(newSegments);
         setShowBulkEdit(false);
-    };
+    }, [bulkText, segments, setSegments]);
 
     // Shuffle segments
-    const handleShuffle = () => {
+    const handleShuffle = useCallback(() => {
         const shuffled = [...segments].sort(() => Math.random() - 0.5);
         setSegments(shuffled);
-    };
+    }, [segments, setSegments]);
 
     // Sort segments alphabetically
-    const handleSort = () => {
+    const handleSort = useCallback(() => {
         const sorted = [...segments].sort((a, b) => a.text.localeCompare(b.text));
         setSegments(sorted);
-    };
+    }, [segments, setSegments]);
 
     // Add single segment
-    const handleAddSegment = () => {
+    const handleAddSegment = useCallback(() => {
         if (newSegmentText.trim()) {
             addSegment({
                 text: newSegmentText.trim(),
@@ -87,7 +144,7 @@ export default function ControlPanel({
             });
             setNewSegmentText('');
         }
-    };
+    }, [newSegmentText, addSegment]);
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -226,44 +283,47 @@ export default function ControlPanel({
                                         <p className="text-xs mt-1">Add items or use Bulk Edit</p>
                                     </div>
                                 ) : (
-                                    segments.map((segment, index) => (
-                                        <div
-                                            key={index}
-                                            className="group flex items-center gap-2 p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all"
-                                        >
-                                            {/* Color Picker (Compact) */}
-                                            <div className="relative shrink-0">
-                                                <input
-                                                    type="color"
-                                                    value={segment.color}
-                                                    onChange={(e) => updateSegment(index, { color: e.target.value })}
-                                                    className="w-6 h-6 rounded-full cursor-pointer opacity-0 absolute inset-0 z-10"
-                                                />
-                                                <div
-                                                    className="w-6 h-6 rounded-full border border-gray-200 shadow-sm"
-                                                    style={{ backgroundColor: segment.color }}
-                                                />
-                                            </div>
-
-                                            {/* Segment Text */}
-                                            <input
-                                                type="text"
-                                                value={segment.text}
-                                                onChange={(e) => updateSegment(index, { text: e.target.value })}
-                                                className="flex-1 min-w-0 bg-transparent py-1 text-sm font-medium text-gray-700 focus:outline-none focus:text-purple-600 truncate"
-                                                maxLength={30}
-                                            />
-
-                                            {/* Delete Button (Visible on hover or always on touch) */}
-                                            <button
-                                                onClick={() => removeSegment(index)}
-                                                className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shrink-0"
-                                                aria-label="Remove segment"
+                                    segments.map((segment, index) => {
+                                        const textColor = getContrastColor(segment.color);
+                                        return (
+                                            <div
+                                                key={index} // Note: using index as key is acceptable here as shuffle rebuilds array
+                                                className="group flex items-center gap-2 p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all"
+                                                style={{ borderLeftWidth: '4px', borderLeftColor: segment.color }}
                                             >
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    ))
+                                                {/* Color Picker (Compact - Hidden) */}
+                                                <div className="relative shrink-0">
+                                                    <input
+                                                        type="color"
+                                                        value={segment.color}
+                                                        onChange={(e) => updateSegment(index, { color: e.target.value })}
+                                                        className="w-5 h-5 opacity-0 absolute inset-0 z-10 cursor-pointer"
+                                                    />
+                                                    <div
+                                                        className="w-5 h-5 rounded-full border border-gray-200 shadow-inner"
+                                                        style={{ backgroundColor: segment.color }}
+                                                    />
+                                                </div>
+
+                                                {/* Segment Text - Debounced */}
+                                                <DebouncedInput
+                                                    value={segment.text}
+                                                    onChange={(val) => updateSegment(index, { text: val })}
+                                                    className="flex-1 min-w-0 bg-transparent py-1 text-sm font-medium text-gray-700 focus:outline-none focus:text-purple-600 truncate"
+                                                    maxLength={30}
+                                                />
+
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={() => removeSegment(index)}
+                                                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shrink-0"
+                                                    aria-label="Remove segment"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        );
+                                    })
                                 )}
                             </div>
                         </div>
@@ -280,11 +340,12 @@ export default function ControlPanel({
                             </div>
                         </div>
 
-                        {/* Elimination Mode Toggle */}
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        {/* Game Options */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-semibold text-gray-700">
                                 Game Options
                             </label>
+
                             <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">🔥</span>
@@ -300,10 +361,7 @@ export default function ControlPanel({
                                     className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-purple-500 before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-6 before:shadow-md"
                                 />
                             </label>
-                        </div>
 
-                        {/* Sound Toggle */}
-                        <div>
                             <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
                                 <div className="flex items-center gap-3">
                                     <span className="text-2xl">🔊</span>

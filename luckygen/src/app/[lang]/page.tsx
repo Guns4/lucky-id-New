@@ -8,7 +8,7 @@ import AdUnit, { TopLeaderboardAd, MediumRectangleAd } from '@/components/ads/Ad
 import AdBlockModal from '@/components/ads/AdBlockModal';
 import { useWheelStore } from '@/lib/store/wheelStore';
 import { useThemes } from '@/hooks/useThemes';
-import Wheel3D from '@/components/wheel/Wheel3D';
+
 import { Maximize2, Minimize2 } from 'lucide-react';
 import Navigation from '@/components/shared/Navigation';
 
@@ -134,7 +134,7 @@ export default function LandingPage() {
                                         : 'text-gray-600 hover:bg-gray-100'
                                         }`}
                                 >
-                                    3D Immersive
+                                    Realistic
                                 </button>
                             </div>
 
@@ -145,21 +145,15 @@ export default function LandingPage() {
 
                                 {/* Wheel */}
                                 <div className="relative z-10">
-                                    {is3D ? (
-                                        <Wheel3D
-                                            segments={themedSegments}
-                                            themeConfig={currentThemeConfig}
-                                        />
-                                    ) : (
-                                        <Wheel
-                                            segments={themedSegments}
-                                            theme={theme}
-                                            themeConfig={currentThemeConfig}
-                                            eliminationMode={eliminationMode}
-                                            onEliminate={handleEliminate}
-                                            onSpinComplete={handleSpinComplete}
-                                        />
-                                    )}
+                                    <Wheel
+                                        segments={themedSegments}
+                                        theme={theme}
+                                        themeConfig={currentThemeConfig}
+                                        eliminationMode={eliminationMode}
+                                        onEliminate={handleEliminate}
+                                        onSpinComplete={handleSpinComplete}
+                                        mode={is3D ? '3D' : '2D'}
+                                    />
                                 </div>
                             </div>
 

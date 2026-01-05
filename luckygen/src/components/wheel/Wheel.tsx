@@ -64,7 +64,9 @@ export default function Wheel({
 
         // Calculate winner deterministically
         const winnerIndex = calculateWinner(segments.length);
-        const targetRotation = getRotationForWinner(winnerIndex, segments.length);
+        const segmentAngle = 360 / (segments.length || 1);
+        // Calibrate: subtract one segment angle to fix visual offset (user reported off-by-one mismatch)
+        const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
 
         const fullSpins = 3 + Math.random() * 2;
         const totalRotation = 360 * fullSpins + targetRotation;

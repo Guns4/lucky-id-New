@@ -82,7 +82,7 @@ export default function LandingPage() {
                     )}
 
                     {/* Right Stage - Wheel Display */}
-                    <main className={`flex-1 relative bg-gradient-to-br from-slate-50 to-slate-100 order-1 lg:order-2 transition-all duration-300 ${isFullscreen ? 'w-full' : ''}`}>
+                    <main className={`flex-1 relative bg-gradient-to-br from-slate-50 via-purple-50 to-cyan-50 order-1 lg:order-2 transition-all duration-300 ${isFullscreen ? 'w-full' : ''}`}>
                         {/* Fullscreen Toggle Button */}
                         <button
                             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -106,8 +106,12 @@ export default function LandingPage() {
                         <div className="lg:hidden sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-gray-200 shadow-sm">
                             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                                        <span className="text-white text-xl font-bold">🎡</span>
+                                    <div className="relative w-10 h-10 transition-transform duration-300 hover:scale-105">
+                                        <img
+                                            src="/ageinfo-logo.png"
+                                            alt="LuckyGen Logo"
+                                            className="w-full h-full object-cover shadow-lg rounded-full"
+                                        />
                                     </div>
                                     <span className="font-bold text-xl text-gray-900">LuckyGen</span>
                                 </div>
@@ -121,7 +125,7 @@ export default function LandingPage() {
                                 <button
                                     onClick={() => setIs3D(false)}
                                     className={`px-6 py-3 rounded-xl transition-all font-bold text-sm ${!is3D
-                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md scale-105'
+                                        ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md scale-105'
                                         : 'text-gray-600 hover:bg-gray-100'
                                         }`}
                                 >
@@ -130,7 +134,7 @@ export default function LandingPage() {
                                 <button
                                     onClick={() => setIs3D(true)}
                                     className={`px-6 py-3 rounded-xl transition-all font-bold text-sm ${is3D
-                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md scale-105'
+                                        ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md scale-105'
                                         : 'text-gray-600 hover:bg-gray-100'
                                         }`}
                                 >
@@ -141,7 +145,7 @@ export default function LandingPage() {
                             {/* Wheel Component */}
                             <div className="relative">
                                 {/* Glow Effect */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
 
                                 {/* Wheel */}
                                 <div className="relative z-10">

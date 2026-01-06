@@ -8,11 +8,11 @@
   --background: #0a0a0a;
   --foreground: #ededed;
 
-  /* Premium Color Palette */
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  --gold-gradient: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  /* Premium Color Palette - Matched to Logo (Purple/Cyan/Pink) */
+  --primary-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+  --secondary-gradient: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  --accent-gradient: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
+  --gold-gradient: linear-gradient(135deg, #F59E0B 0%, #FCD34D 100%);
 
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.1);
@@ -86,7 +86,7 @@ h6 {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -104,7 +104,7 @@ h6 {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #8B5CF6, #06B6D4);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -163,11 +163,11 @@ h6 {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
   }
 
   50% {
-    box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
   }
 }
 

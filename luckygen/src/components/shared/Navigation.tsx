@@ -66,10 +66,10 @@ export default function Navigation() {
                                     <img
                                         src="/ageinfo-logo.png"
                                         alt="AgeInfo Logo"
-                                        className="w-full h-full object-contain drop-shadow-md"
+                                        className="w-full h-full object-cover drop-shadow-md rounded-full"
                                     />
                                 </div>
-                                <span className="font-bold text-xl text-gray-900 hidden sm:inline-block group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all duration-300">
+                                <span className="font-bold text-xl text-gray-900 hidden sm:inline-block group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-cyan-500 group-hover:bg-clip-text transition-all duration-300">
                                     AgeInfo
                                 </span>
                             </Link>
@@ -84,7 +84,7 @@ export default function Navigation() {
                                             key={link.href}
                                             href={link.href}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${active
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                                                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md'
                                                 : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                                 }`}
                                         >
@@ -132,7 +132,7 @@ export default function Navigation() {
                                         href={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${active
-                                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                                            ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md'
                                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
                                     >

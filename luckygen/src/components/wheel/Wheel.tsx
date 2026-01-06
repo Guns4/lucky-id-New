@@ -61,99 +61,27 @@ const Wheel = memo(({
     const segmentCount = segments.length || 1;
     const segmentAngle = 360 / segmentCount;
 
-    // Spin Logic
-    const handleSpin = useCallback(async () => {
-        if (isSpinning || segments.length === 0) return;
-
-        setIsSpinning(true);
-        setWinner(null);
-
-        // Deterministic Winner
-        const winnerIndex = calculateWinner(segments.length);
-        // Rotation Calculation: Subtract 1 segment angle to fix visual offset
-        const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
-        const fullSpins = 3 + Math.random() * 2; // 3 to 5 full spins
-        const finalRotation = 360 * fullSpins + targetRotation;
-
-        let lastSegmentIndex = -1;
-
-        await controls.start({
-            rotate: finalRotation,
-            transition: {
-                duration: 4.5,
-                ease: [0.2, 0.8, 0.2, 1], // Cubic Bezier for realistic friction
-            }
-        });
-
-        // Use onUpdate in animation if possible, but framer-motion controls don't support onUpdate callback easily in start().
-        // We can simulate ticks or use a separate effect observing the motion value if strictly needed.
-        // For performance, let's keep it simple: simpler onUpdate or rely on CSS/frameloop?
-        // Actually, controls.start returns a promise. We can't easily hook into onUpdate there.
-        // Let's fallback to `animate` helper for onUpdate if we want sound sync.
-    }, [isSpinning, segments, controls, segmentAngle]);
-
-    // Re-implement spin using animate() for sound sync
-    const executeSpin = useCallback(async () => {
-        if (isSpinning || segments.length === 0) return;
-        setIsSpinning(true);
-        setWinner(null);
-
-        const winnerIndex = calculateWinner(segments.length);
-        const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
-        const fullSpins = 4 + Math.random(); // More spins
-        const totalRotation = 360 * fullSpins + targetRotation;
-
-        // Reset rotation if it's too high to prevent precision issues
-        const currentRotation = rotation.get();
-        rotation.set(currentRotation % 360);
-
-        let lastIndex = -1;
-
-        await controls.start({
-            rotate: totalRotation,
-            transition: {
-                duration: 5,
-                ease: [0.15, 0.85, 0.35, 1],
-                // HACK: Framer Motion 'controls' doesn't support onUpdate. 
-                // We use a separate MotionValue listener or the 'animate' function.
-                // Switching mainly to 'animate' function is better for this.
-            }
-        });
-
-        // Since playTick needs onUpdate, let's use a simpler approach:
-        // animating a motion value directly in a useEffect or imperative animate.
-    }, [isSpinning, segments, rotation, controls, segmentAngle]);
-
-
-    // Correct Spin Implementation using imperative animate
-    useEffect(() => {
-        if (!isSpinning) return;
-    }, [isSpinning]);
-
+    // Optimized Spin Logic
     const performSpin = async () => {
         if (isSpinning || segments.length === 0) return;
         setIsSpinning(true);
         setWinner(null);
 
         const winnerIndex = calculateWinner(segments.length);
-        // Calculation: 
-        // pointer is at top (270deg visual, or 0deg logical). 
-        // Our SVG starts at -90deg (12 o'clock).
         const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
-        const fullSpins = 5;
-        const totalDegree = 360 * fullSpins + targetRotation;
 
-        let lastSeg = -1;
+        // Faster spin: More rotations in less time
+        const fullSpins = 8 + Math.floor(Math.random() * 3); // 8-10 full spins
+        const totalDegree = 360 * fullSpins + targetRotation;
 
         await controls.start({
             rotate: totalDegree,
             transition: {
-                duration: 5,
-                ease: "circOut", // Stronger deceleration
+                duration: 3.5, // Reduced from 5s for snappier feel
+                ease: "circOut",
             }
         });
 
-        // Winner Announcement
         const winningText = segments[winnerIndex].text;
         setWinner(winningText);
         playWin();
@@ -219,7 +147,7 @@ const Wheel = memo(({
                 <feComposite operator="in" in="color" in2="inverse" result="shadow" />
                 <feComposite operator="over" in="shadow" in2="SourceGraphic" />
             </filter>
-            
+
             {/* Metallic Gold Gradient for Border */}
             <linearGradient id="gold-border" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#BF953F" />
@@ -271,19 +199,19 @@ const Wheel = memo(({
 
             {/* Main Wheel Render */}
             <div className={`relative w-full max-w-md aspect-square transition-all duration-500 ${mode === '3D' ? 'scale-105' : ''}`}>
-                
+
                 {/* Pointer (Z-index high) */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-5 z-30 filter drop-shadow-xl"> 
-                   {themeConfig.pointerImageUrl ? (
-                       <img src={themeConfig.pointerImageUrl} alt="Pointer" className="w-14 h-14 object-contain" />
-                   ) : (
-                       <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[40px] border-l-transparent border-r-transparent" 
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-5 z-30 filter drop-shadow-xl">
+                    {themeConfig.pointerImageUrl ? (
+                        <img src={themeConfig.pointerImageUrl} alt="Pointer" className="w-14 h-14 object-contain" />
+                    ) : (
+                        <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[40px] border-l-transparent border-r-transparent"
                             style={{ borderTopColor: themeConfig.pointerColor }} />
-                   )}
+                    )}
                 </div>
 
                 {/* The Rotating Wheel */}
-                <motion.div 
+                <motion.div
                     className="w-full h-full"
                     style={{ rotate: rotation }}
                     animate={controls}
@@ -291,20 +219,20 @@ const Wheel = memo(({
                     {/* SVG Wheel */}
                     <svg viewBox="-160 -160 320 320" className="w-full h-full" style={{ overflow: 'visible' }}>
                         {renderFilters()}
-                        
+
                         {/* Outer Glow/Border - Changes based on Mode */}
-                        <circle 
-                            cx="0" 
-                            cy="0" 
-                            r="158" 
-                            fill={mode === '3D' ? 'url(#gold-border)' : themeConfig.outerRing} 
-                            stroke="rgba(0,0,0,0.1)" 
+                        <circle
+                            cx="0"
+                            cy="0"
+                            r="158"
+                            fill={mode === '3D' ? 'url(#gold-border)' : themeConfig.outerRing}
+                            stroke="rgba(0,0,0,0.1)"
                             strokeWidth={mode === '3D' ? 0 : 8}
                             filter={mode === '3D' ? 'url(#soft-shadow)' : ''}
                         />
-                        
+
                         {/* Wheel Background for empty/loading */}
-                         <circle cx="0" cy="0" r="150" fill="#f3f4f6" />
+                        <circle cx="0" cy="0" r="150" fill="#f3f4f6" />
 
                         {segments.length > 0 && segments.map((segment, i) => {
                             const angle = (360 / segmentCount);
@@ -316,7 +244,7 @@ const Wheel = memo(({
                             const y1 = r * Math.sin(startAngle);
                             const x2 = r * Math.cos(endAngle);
                             const y2 = r * Math.sin(endAngle);
-                            
+
                             // Text Math
                             const midAngle = i * angle + angle / 2;
                             const textR = r * 0.65;
@@ -326,9 +254,9 @@ const Wheel = memo(({
                             return (
                                 <g key={i}>
                                     {/* Segment Slice */}
-                                    <path 
-                                        d={`M 0 0 L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`} 
-                                        fill={segment.color} 
+                                    <path
+                                        d={`M 0 0 L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                                        fill={segment.color}
                                         stroke={mode === '3D' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)'}
                                         strokeWidth="1"
                                         filter={mode === '3D' ? 'url(#inner-shadow)' : ''} // Depth in Realistic Mode
@@ -343,9 +271,9 @@ const Wheel = memo(({
                                         textAnchor="middle"
                                         dominantBaseline="middle"
                                         transform={`rotate(${midAngle}, ${textX}, ${textY})`}
-                                        style={{ 
+                                        style={{
                                             textShadow: mode === '3D' ? '0 1px 1px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.1)',
-                                            fontFamily: 'var(--font-heading)' 
+                                            fontFamily: 'var(--font-heading)'
                                         }}
                                     >
                                         {segment.text.substring(0, 18) + (segment.text.length > 18 ? '...' : '')}
@@ -360,11 +288,11 @@ const Wheel = memo(({
                         )}
 
                         {/* Center Hub */}
-                        <circle 
-                            cx="0" 
-                            cy="0" 
-                            r="28" 
-                            fill={mode === '3D' ? 'url(#gold-border)' : '#1f2937'} 
+                        <circle
+                            cx="0"
+                            cy="0"
+                            r="28"
+                            fill={mode === '3D' ? 'url(#gold-border)' : '#1f2937'}
                             stroke={mode === '3D' ? 'rgba(0,0,0,0.2)' : 'white'}
                             strokeWidth={mode === '3D' ? 1 : 4}
                             filter="url(#soft-shadow)"

@@ -156,8 +156,12 @@ export default function ControlPanel({
         <div className="h-full bg-white lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto font-sans">
             <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-white text-xl font-bold">🎡</span>
+                    <div className="relative w-10 h-10 transition-transform duration-300 hover:scale-105">
+                        <img
+                            src="/ageinfo-logo.png"
+                            alt="Wheel Editor Logo"
+                            className="w-full h-full object-cover shadow-lg rounded-full"
+                        />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-gray-900">Wheel Editor</h2>

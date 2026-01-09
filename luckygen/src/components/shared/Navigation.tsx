@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AuthButton from '@/components/auth/AuthButton';
 import LoginModal from '@/components/auth/LoginModal';
-import { Menu, X, Compass, Home, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Compass, Home, LayoutDashboard, Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Navigation() {
@@ -35,6 +35,7 @@ export default function Navigation() {
     // Base navigation links - always visible
     const baseNavLinks = [
         { href: '/', label: 'Home', icon: Home },
+        { href: '/showcase', label: 'Why LuckyGen', icon: Star },
     ];
 
     // Add Explore and Dashboard only if logged in
@@ -55,7 +56,7 @@ export default function Navigation() {
 
     return (
         <>
-            <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 border-b border-gray-200/50 shadow-sm">
+            <nav className="sticky top-0 z-50 w-full glass-panel border-b border-white/10 shadow-lg">
                 <div className="container mx-auto px-4">
                     <div className="flex items-center justify-between h-16">
                         {/* Left Side: Logo & Navigation */}
@@ -66,10 +67,10 @@ export default function Navigation() {
                                     <img
                                         src="/ageinfo-logo.png"
                                         alt="AgeInfo Logo"
-                                        className="w-full h-full object-cover drop-shadow-md rounded-full"
+                                        className="w-full h-full object-cover rounded-full ring-2 ring-purple-500/50"
                                     />
                                 </div>
-                                <span className="font-bold text-xl text-gray-900 hidden sm:inline-block group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-500 group-hover:to-cyan-500 group-hover:bg-clip-text transition-all duration-300">
+                                <span className="font-bold text-xl text-white hidden sm:inline-block group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-cyan-400 group-hover:bg-clip-text transition-all duration-300">
                                     AgeInfo
                                 </span>
                             </Link>
@@ -83,9 +84,9 @@ export default function Navigation() {
                                         <Link
                                             key={link.href}
                                             href={link.href}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-200 ${active
-                                                ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 ${active
+                                                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                                                 }`}
                                         >
                                             <Icon size={18} />
@@ -106,13 +107,13 @@ export default function Navigation() {
                             {/* Mobile Menu Button */}
                             <button
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="md:hidden p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                                className="md:hidden p-2 rounded-xl text-gray-300 hover:bg-white/10 transition-colors"
                                 aria-label="Toggle menu"
                             >
                                 {mobileMenuOpen ? (
-                                    <X size={24} className="text-gray-700" />
+                                    <X size={24} />
                                 ) : (
-                                    <Menu size={24} className="text-gray-700" />
+                                    <Menu size={24} />
                                 )}
                             </button>
                         </div>
@@ -121,7 +122,7 @@ export default function Navigation() {
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200/50 bg-white/95 backdrop-blur-xl animate-in slide-in-from-top-4 duration-300">
+                    <div className="md:hidden border-t border-white/10 bg-[#0f172a]/95 backdrop-blur-xl animate-in slide-in-from-top-4 duration-300">
                         <div className="container mx-auto px-4 py-4 space-y-2">
                             {navLinks.map((link) => {
                                 const Icon = link.icon;
@@ -132,8 +133,8 @@ export default function Navigation() {
                                         href={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${active
-                                            ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md'
-                                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                            ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         <Icon size={20} />
@@ -141,7 +142,7 @@ export default function Navigation() {
                                     </Link>
                                 );
                             })}
-                            <div className="pt-2 border-t border-gray-200">
+                            <div className="pt-2 border-t border-white/10">
                                 <AuthButton onLoginClick={() => {
                                     setMobileMenuOpen(false);
                                     setLoginModalOpen(true);

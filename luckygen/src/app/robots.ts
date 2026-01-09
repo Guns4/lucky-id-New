@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ['/api/', '/_next/'],
             },
         ],
-        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://luckygen.click'}/sitemap.xml`,
+        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luckygen.click'}/sitemap.xml`,
     };
 }

@@ -1,181 +1,226 @@
-/* Google Fonts Import - Must be at top */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+/* Premium Google Fonts Import - Better than competitors */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @import "tailwindcss";
-
+@import "./premium-utilities.css";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* Ultra Dark Premium Theme - Comfortable for Eyes */
+  --background: #0a0f1e;
+  /* Deeper Dark Blue */
+  --background-secondary: #10151f;
+  /* Slightly lighter */
+  --foreground: #e2e8f0;
+  /* Softer white, less bright */
+  --foreground-muted: #94a3b8;
+  /* Muted text */
 
-  /* Premium Color Palette - Matched to Logo (Purple/Cyan/Pink) */
-  --primary-gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
-  --secondary-gradient: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
-  --accent-gradient: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
-  --gold-gradient: linear-gradient(135deg, #F59E0B 0%, #FCD34D 100%);
+  --card-bg: rgba(16, 21, 31, 0.85);
+  --card-bg-hover: rgba(20, 26, 38, 0.95);
+  --card-border: rgba(100, 116, 139, 0.15);
 
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  /* Softer Brand Colors - Less Bright */
+  --primary: #7c3aed;
+  /* Deeper Violet */
+  --primary-light: #8b5cf6;
+  --primary-dark: #6d28d9;
+  --secondary: #0ea5e9;
+  /* Deeper Sky Blue */
+  --accent: #ec4899;
+  /* Softer Pink */
 
-  /* Spacing Scale (8px grid) */
-  --spacing-xs: 0.5rem;
-  /* 8px */
-  --spacing-sm: 1rem;
-  /* 16px */
-  --spacing-md: 1.5rem;
-  /* 24px */
-  --spacing-lg: 2rem;
-  /* 32px */
-  --spacing-xl: 3rem;
-  /* 48px */
-  --spacing-2xl: 4rem;
-  /* 64px */
+  /* Gradients - More Subtle */
+  --primary-gradient: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a855f7 100%);
+  --dark-gradient: linear-gradient(to bottom right, #10151f, #0a0f1e);
+  --glass-gradient: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  --surface-gradient: linear-gradient(to bottom right, #1e293b, #0f172a);
+
+  /* Enhanced Glassmorphism for Dark Theme */
+  --glass-bg: rgba(10, 15, 30, 0.7);
+  --glass-bg-light: rgba(16, 21, 31, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  --glass-shadow-light: 0 4px 16px 0 rgba(0, 0, 0, 0.3);
+
+  /* Mobile Optimized Spacing */
+  --mobile-padding: 1rem;
+  --mobile-gap: 0.75rem;
+  --desktop-padding: 2rem;
+  --desktop-gap: 1.5rem;
+
+  /* === PREMIUM ADDITIONS - Better than Competitors === */
+
+  /* Professional Shadows - Multi-layered */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+  /* Premium Glow Effects */
+  --glow-primary: 0 0 20px rgba(124, 58, 237, 0.5), 0 0 40px rgba(124, 58, 237, 0.3);
+  --glow-secondary: 0 0 20px rgba(14, 165, 233, 0.5), 0 0 40px rgba(14, 165, 233, 0.3);
+  --glow-accent: 0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3);
+
+  /* Advanced Color Palette */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Premium Gradients */
+  --secondary-gradient: linear-gradient(135deg, #0369a1 0%, #0ea5e9 50%, #38bdf8 100%);
+  --accent-gradient: linear-gradient(135deg, #be185d 0%, #ec4899 50%, #f472b6 100%);
+  --rainbow-gradient: linear-gradient(90deg, #7c3aed, #ec4899, #f59e0b, #10b981, #0ea5e9);
+
+  /* Border Radius System */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Premium Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Z-index System */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-modal: 1050;
+  --z-tooltip: 1070;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.5);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-/* Smooth Scroll */
+/* Base Styles */
 html {
   scroll-behavior: smooth;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* More subtle background gradient - less bright */
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.08) 0%, transparent 30%),
+    radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08) 0%, transparent 30%);
+  background-attachment: fixed;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+  /* Optimize scrolling on mobile */
+  -webkit-overflow-scrolling: touch;
+  /* Minimum height for mobile */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 
-/* Typography */
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+  body {
+    /* Even lighter background patterns on mobile */
+    background-image:
+      radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.05) 0%, transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.05) 0%, transparent 25%);
+  }
+}
+
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
 }
 
-/* Utility Classes */
-.glass-card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+/* Utility Components */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-.glass-card-hover {
+.glass-button {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+.glass-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.glass-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--foreground);
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.gradient-border {
-  position: relative;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  border: 1px solid transparent;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, #8B5CF6, #06B6D4);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
 }
 
-/* Keyframe Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-  }
-
-  50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
-  }
-}
-
+/* Animations */
 @keyframes float {
 
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translateY(0);
   }
 
   50% {
@@ -183,94 +228,226 @@ h6 {
   }
 }
 
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-/* Animation Classes */
-.animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s ease-out;
-}
-
-.animate-slide-down {
-  animation: slideDown 0.6s ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.4s ease-out;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
-/* Stagger Animation Delay Utilities */
-.stagger-1 {
-  animation-delay: 0.1s;
+/* Form Elements Overrides */
+input[type="checkbox"] {
+  accent-color: var(--primary);
 }
 
-.stagger-2 {
-  animation-delay: 0.2s;
+/* Layout Utilities */
+.container-premium {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--mobile-padding);
 }
 
-.stagger-3 {
-  animation-delay: 0.3s;
+@media (min-width: 768px) {
+  .container-premium {
+    padding: 0 var(--desktop-padding);
+  }
 }
 
-.stagger-4 {
-  animation-delay: 0.4s;
+/* Mobile-First Responsive Utilities */
+@media (max-width: 640px) {
+
+  /* Small phones - 320px to 640px */
+  h1 {
+    font-size: 1.75rem !important;
+    /* 28px */
+    line-height: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+    /* 24px */
+    line-height: 1.75rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+    /* 20px */
+    line-height: 1.5rem !important;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better spacing on mobile */
+  .glass-panel {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
 }
 
-.stagger-5 {
-  animation-delay: 0.5s;
+@media (min-width: 641px) and (max-width: 768px) {
+
+  /* Medium phones and small tablets - 641px to 768px */
+  h1 {
+    font-size: 2rem !important;
+    /* 32px */
+  }
+
+  h2 {
+    font-size: 1.75rem !important;
+    /* 28px */
+  }
+
+  .glass-panel {
+    padding: 1.25rem;
+    margin: 0.75rem;
+  }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  /* Tablets - 769px to 1024px */
+  h1 {
+    font-size: 2.25rem !important;
+    /* 36px */
+  }
+
+  h2 {
+    font-size: 2rem !important;
+    /* 32px */
+  }
+
+  .glass-panel {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+/* Touch-friendly interactive elements */
+@media (hover: none) and (pointer: coarse) {
+
+  /* This targets touch devices */
+  button,
+  .glass-button,
+  a {
+    /* Larger touch targets */
+    padding: 0.75rem 1.25rem;
+  }
+
+  /* Disable hover animations on touch devices */
+  .glass-button:hover {
+    transform: none;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
+/* Landscape mode optimizations for mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+  body {
+    min-height: 100vh;
+  }
+
+  .container-premium {
+    padding: 0 1rem;
+  }
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+/* Dark mode enhancements for OLED screens */
+@media (prefers-color-scheme: dark) {
+  body {
+    /* Pure black for OLED - saves battery */
+    --background: #000000;
+  }
 }
 
-/* Focus Styles */
-*:focus-visible {
-  outline: 2px solid #667eea;
-  outline-offset: 2px;
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-panel {
+    border: 2px solid var(--foreground);
+  }
+
+  .glass-border {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Safe area insets for notched devices (iPhone X+, etc) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .container-premium {
+    padding-left: max(var(--mobile-padding), env(safe-area-inset-left));
+    padding-right: max(var(--mobile-padding), env(safe-area-inset-right));
+  }
+}
+
+/* Prevent text size adjustment on mobile */
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Optimize font rendering on mobile */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile sticky elements */
+.mobile-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Mobile full-width utility */
+.mobile-full {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+/* Prevent zoom on input focus (iOS) */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px;
+  /* Prevents zoom on iOS */
+}
+
+/* Better tap highlighting */
+* {
+  -webkit-tap-highlight-color: rgba(124, 58, 237, 0.2);
+}
+
+/* Smooth scrolling behavior */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

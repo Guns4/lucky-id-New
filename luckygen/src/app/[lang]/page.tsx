@@ -55,15 +55,15 @@ export default function LandingPage() {
     return (
         <>
             <Navigation />
-            <div className="min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+            <div className="min-h-screen bg-[#0a0f1e] flex flex-col overflow-hidden">
                 {/* Top Leaderboard Ad - High Visibility */}
                 <TopLeaderboardAd slotId="1234567890" refreshTrigger={spinCount} />
 
                 {/* Main Split Screen Layout */}
-                <div className="flex-1 flex flex-col lg:flex-row">
+                <div className="flex-1 flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden">
                     {/* Left Sidebar - Control Panel */}
                     {!isFullscreen && (
-                        <aside className="w-full lg:w-[35%] lg:max-w-md order-2 lg:order-1 shadow-xl">
+                        <aside className="w-full lg:w-[400px] xl:w-[450px] order-2 lg:order-1 flex-shrink-0 border-r border-white/10 glass-panel z-10">
                             <ControlPanel
                                 segments={segments}
                                 setSegments={setSegments}
@@ -82,100 +82,95 @@ export default function LandingPage() {
                     )}
 
                     {/* Right Stage - Wheel Display */}
-                    <main className={`flex-1 relative bg-gradient-to-br from-slate-50 via-purple-50 to-cyan-50 order-1 lg:order-2 transition-all duration-300 ${isFullscreen ? 'w-full' : ''}`}>
+                    <main className={`flex-1 relative order-1 lg:order-2 transition-all duration-300 ${isFullscreen ? 'w-full' : ''} flex flex-col`}>
+                        {/* Background Overlay for depth */}
+                        <div className="absolute inset-0 bg-gradient-radial from-violet-500/10 via-transparent to-transparent pointer-events-none" />
+
                         {/* Fullscreen Toggle Button */}
                         <button
                             onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="absolute top-6 right-6 z-50 hidden lg:flex items-center gap-2 px-5 py-3 backdrop-blur-md bg-white/80 hover:bg-white/90 text-gray-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border border-gray-200/50"
+                            className="absolute top-6 right-6 z-50 hidden lg:flex items-center gap-2 px-4 py-2 glass-button text-white/90 rounded-full text-sm font-medium hover:text-white"
                             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
                         >
-                            {isFullscreen ? (
-                                <>
-                                    <Minimize2 size={18} />
-                                    <span className="text-sm">Exit Fullscreen</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Maximize2 size={18} />
-                                    <span className="text-sm">Fullscreen</span>
-                                </>
-                            )}
+                            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                            <span className="hidden xl:inline">{isFullscreen ? 'Exit' : 'Fullscreen'}</span>
                         </button>
 
                         {/* Sticky Header - Mobile Only */}
-                        <div className="lg:hidden sticky top-0 z-40 backdrop-blur-md bg-white/90 border-b border-gray-200 shadow-sm">
-                            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                        <div className="lg:hidden sticky top-0 z-40 glass-panel border-b border-white/10">
+                            <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
-                                    <div className="relative w-10 h-10 transition-transform duration-300 hover:scale-105">
+                                    <div className="relative w-8 h-8">
                                         <img
                                             src="/ageinfo-logo.png"
-                                            alt="LuckyGen Logo"
-                                            className="w-full h-full object-cover shadow-lg rounded-full"
+                                            alt="LuckyGen"
+                                            className="w-full h-full object-cover rounded-full ring-2 ring-purple-500/50"
                                         />
                                     </div>
-                                    <span className="font-bold text-xl text-gray-900">LuckyGen</span>
+                                    <span className="font-bold text-lg text-white tracking-tight">LuckyGen</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Wheel Container */}
-                        <div className="flex flex-col items-center justify-center min-h-[50vh] lg:min-h-screen p-4 lg:p-8">
+                        <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 overflow-y-auto">
+
                             {/* 3D Toggle */}
-                            <div className="mb-6 flex gap-2 bg-white p-2 rounded-2xl shadow-lg border border-gray-200">
+                            <div className="mb-8 flex p-1 glass-panel rounded-full relative z-20">
                                 <button
                                     onClick={() => setIs3D(false)}
-                                    className={`px-6 py-3 rounded-xl transition-all font-bold text-sm ${!is3D
-                                        ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md scale-105'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`px-6 py-2 rounded-full transition-all font-medium text-sm ${!is3D
+                                        ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                        : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
-                                    2D Classic
+                                    Classic 2D
                                 </button>
                                 <button
                                     onClick={() => setIs3D(true)}
-                                    className={`px-6 py-3 rounded-xl transition-all font-bold text-sm ${is3D
-                                        ? 'bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-md scale-105'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`px-6 py-2 rounded-full transition-all font-medium text-sm ${is3D
+                                        ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                        : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
-                                    Realistic
+                                    Realistic 3D
                                 </button>
                             </div>
 
                             {/* Wheel Component */}
-                            <div className="relative">
-                                {/* Glow Effect */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+                            <div className="relative z-10 scale-90 lg:scale-100 transition-transform">
+                                {/* Glow Effect behind wheel */}
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-violet-500/20 blur-[100px] rounded-full pointer-events-none"></div>
 
-                                {/* Wheel */}
-                                <div className="relative z-10">
-                                    <Wheel
-                                        segments={themedSegments}
-                                        theme={theme}
-                                        themeConfig={currentThemeConfig}
-                                        eliminationMode={eliminationMode}
-                                        onEliminate={handleEliminate}
-                                        onSpinComplete={handleSpinComplete}
-                                        mode={is3D ? '3D' : '2D'}
-                                    />
-                                </div>
+                                <Wheel
+                                    segments={themedSegments}
+                                    theme={theme}
+                                    themeConfig={currentThemeConfig}
+                                    eliminationMode={eliminationMode}
+                                    onEliminate={handleEliminate}
+                                    onSpinComplete={handleSpinComplete}
+                                    mode={is3D ? '3D' : '2D'}
+                                />
                             </div>
 
                             {/* Segment Count Info */}
                             {segments.length > 0 && (
-                                <div className="mt-6 bg-white px-6 py-3 rounded-full shadow-lg border border-gray-200">
-                                    <span className="text-gray-700 font-semibold">
-                                        🎯 {segments.length} option{segments.length !== 1 ? 's' : ''} ready
+                                <div className="mt-8 px-5 py-2 glass-panel rounded-full border border-white/5">
+                                    <span className="text-gray-300 text-sm font-medium flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        {segments.length} active options
                                     </span>
                                 </div>
                             )}
 
                             {/* The Money Spot - Rectangle Ad Below Wheel */}
-                            <MediumRectangleAd slotId="0987654321" refreshTrigger={spinCount} />
+                            <div className="mt-8 opacity-80 hover:opacity-100 transition-opacity">
+                                <MediumRectangleAd slotId="0987654321" refreshTrigger={spinCount} />
+                            </div>
                         </div>
 
                         {/* Ad Unit - Fixed Bottom on Desktop, Below Wheel on Mobile */}
-                        <div className="lg:fixed lg:bottom-0 lg:left-0 lg:right-0 mt-8 lg:mt-0">
+                        <div className="w-full glass-panel border-t border-white/5 p-2 bg-black/20">
                             <InContentAd />
                         </div>
                     </main>

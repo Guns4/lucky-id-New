@@ -85,7 +85,7 @@ export default function DashboardPage({ params: { lang } }: { params: { lang: st
     }
 
     return (
-        <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+        <main className="min-h-screen bg-[#0a0f1e] transition-colors">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4">

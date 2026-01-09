@@ -153,158 +153,156 @@ export default function ControlPanel({
     };
 
     return (
-        <div className="h-full bg-white lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto font-sans">
-            <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="relative w-10 h-10 transition-transform duration-300 hover:scale-105">
+        <div className="h-full flex flex-col font-sans text-gray-100">
+            <div className="p-6 border-b border-white/10 glass-panel shadow-none rounded-none">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="relative w-12 h-12 transition-transform duration-300 hover:scale-105 ring-2 ring-purple-500/50 rounded-full">
                         <img
                             src="/ageinfo-logo.png"
                             alt="Wheel Editor Logo"
-                            className="w-full h-full object-cover shadow-lg rounded-full"
+                            className="w-full h-full object-cover rounded-full"
                         />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Wheel Editor</h2>
-                        <p className="text-sm text-gray-500">Customize your wheel</p>
+                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Wheel Editor</h2>
+                        <p className="text-xs text-gray-400 font-mono mt-1">v2.4.0 PRO</p>
                     </div>
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+                <div className="flex p-1 rounded-xl bg-black/20 border border-white/5 backdrop-blur-sm">
                     <button
                         onClick={() => setActiveTab('entries')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'entries'
-                            ? 'bg-white text-purple-600 shadow-sm'
-                            : 'text-gray-600 hover:text-gray-900'
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'entries'
+                            ? 'bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Edit3 size={18} />
+                        <Edit3 size={16} />
                         <span>Entries</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${activeTab === 'settings'
-                            ? 'bg-white text-purple-600 shadow-sm'
-                            : 'text-gray-600 hover:text-gray-900'
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'settings'
+                            ? 'bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Settings2 size={18} />
+                        <Settings2 size={16} />
                         <span>Settings</span>
                     </button>
                 </div>
             </div>
 
             {/* Tab Content */}
-            <div className="p-6">
+            <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                 {activeTab === 'entries' ? (
                     <div className="space-y-6">
                         {/* Toolbar Actions */}
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-3 gap-2 px-2 pt-2">
                             <button
                                 onClick={handleShuffle}
                                 disabled={segments.length < 2}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold text-sm transition-all border border-blue-200"
+                                className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white disabled:opacity-30 rounded-lg text-xs font-medium transition-all group border border-white/5"
                             >
-                                <Shuffle size={14} />
+                                <Shuffle size={14} className="group-hover:rotate-180 transition-transform duration-500" />
                                 Shuffle
                             </button>
                             <button
                                 onClick={handleSort}
                                 disabled={segments.length < 2}
-                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-semibold text-sm transition-all border border-purple-200"
+                                className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white disabled:opacity-30 rounded-lg text-xs font-medium transition-all group border border-white/5"
                             >
                                 <ArrowDownAZ size={14} />
-                                Sort A-Z
+                                A-Z
                             </button>
                             <button
                                 onClick={toggleBulkEdit}
-                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm transition-all border ${showBulkEdit
-                                    ? 'bg-gray-800 text-white border-gray-800'
-                                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'}`}
+                                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all border ${showBulkEdit
+                                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                                    : 'bg-white/5 text-gray-300 hover:bg-white/10 border-white/5'}`}
                             >
                                 <Edit3 size={14} />
-                                {showBulkEdit ? 'Done' : 'Bulk Edit'}
+                                {showBulkEdit ? 'Done' : 'Bulk'}
                             </button>
                         </div>
 
                         {/* Bulk Edit Section (Collapsible) */}
                         {showBulkEdit && (
-                            <div className="animate-in slide-in-from-top-2 duration-200">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Paste list (one per line)
+                            <div className="animate-in slide-in-from-top-2 duration-300 px-2">
+                                <label className="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">
+                                    Quick Import
                                 </label>
                                 <textarea
                                     value={bulkText}
                                     onChange={(e) => setBulkText(e.target.value)}
-                                    placeholder="Pizza&#10;Burger&#10;Sushi&#10;Tacos"
-                                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all resize-none font-mono text-sm"
-                                    rows={6}
+                                    placeholder="Pizza&#10;Burger&#10;Sushi"
+                                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 text-gray-200 placeholder-gray-600 transition-all resize-none font-mono text-xs leading-relaxed"
+                                    rows={8}
                                 />
                                 <button
                                     onClick={handleBulkUpdate}
-                                    className="w-full mt-2 py-2 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors"
+                                    className="w-full mt-3 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-lg font-bold shadow-lg shadow-emerald-500/20 transition-all active:scale-95 text-sm"
                                 >
-                                    Update Wheel
+                                    Update Wheel Data
                                 </button>
                             </div>
                         )}
 
                         {/* Add Single Entry */}
-                        <div>
-                            <div className="flex gap-2">
+                        <div className="px-2">
+                            <div className="flex gap-2 relative">
                                 <input
                                     type="text"
                                     value={newSegmentText}
                                     onChange={(e) => setNewSegmentText(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    placeholder="Type & Enter to add..."
-                                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-100 text-gray-900 placeholder-gray-400 transition-all shadow-sm"
+                                    placeholder="Add new entry..."
+                                    className="flex-1 pl-4 pr-3 py-3 bg-black/30 border border-white/10 rounded-xl focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 text-gray-200 placeholder-gray-600 transition-all font-medium"
                                     maxLength={30}
                                 />
                                 <button
                                     onClick={handleAddSegment}
-                                    className="px-5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-xl font-bold transition-all duration-200 active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center text-white"
+                                    className="w-12 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 rounded-xl text-white shadow-lg transition-all active:scale-95"
                                 >
-                                    <Plus size={24} strokeWidth={3} />
+                                    <Plus size={20} strokeWidth={3} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Segments Grid */}
-                        <div>
-                            <div className="flex justify-between items-center mb-3">
-                                <label className="text-sm font-semibold text-gray-700">
-                                    Entries ({segments.length})
+                        <div className="px-2 pb-4">
+                            <div className="flex justify-between items-center mb-3 px-1">
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                    Entries List ({segments.length})
                                 </label>
-                                <span className="text-xs text-gray-400">Click color to change</span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-1">
+                            <div className="grid grid-cols-1 gap-2">
                                 {segments.length === 0 ? (
-                                    <div className="col-span-2 text-center py-10 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 text-gray-400">
-                                        <div className="text-4xl mb-2">🎯</div>
-                                        <p className="text-sm font-medium">No items yet</p>
-                                        <p className="text-xs mt-1">Add items or use Bulk Edit</p>
+                                    <div className="text-center py-12 border border-dashed border-white/10 rounded-xl bg-white/5">
+                                        <div className="text-4xl mb-3 opacity-50">🎯</div>
+                                        <p className="text-sm font-medium text-gray-400">Wheel is empty</p>
+                                        <p className="text-xs text-gray-500 mt-1">Add items to start spinning</p>
                                     </div>
                                 ) : (
                                     segments.map((segment, index) => {
-                                        const textColor = getContrastColor(segment.color);
+                                        // Calculate brightness for contrast
                                         return (
                                             <div
-                                                key={index} // Note: using index as key is acceptable here as shuffle rebuilds array
-                                                className="group flex items-center gap-2 p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-purple-200 transition-all"
-                                                style={{ borderLeftWidth: '4px', borderLeftColor: segment.color }}
+                                                key={index}
+                                                className="group flex items-center gap-3 p-2 pr-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-xl transition-all duration-200"
                                             >
-                                                {/* Color Picker (Compact - Hidden) */}
-                                                <div className="relative shrink-0">
+                                                {/* Color Picker Indicator */}
+                                                <div className="relative shrink-0 group/color cursor-pointer">
                                                     <input
                                                         type="color"
                                                         value={segment.color}
                                                         onChange={(e) => updateSegment(index, { color: e.target.value })}
-                                                        className="w-5 h-5 opacity-0 absolute inset-0 z-10 cursor-pointer"
+                                                        className="w-8 h-8 opacity-0 absolute inset-0 z-10 cursor-pointer"
                                                     />
                                                     <div
-                                                        className="w-5 h-5 rounded-full border border-gray-200 shadow-inner"
+                                                        className="w-8 h-8 rounded-lg shadow-inner ring-1 ring-white/10 transition-transform group-active/color:scale-90"
                                                         style={{ backgroundColor: segment.color }}
                                                     />
                                                 </div>
@@ -313,14 +311,14 @@ export default function ControlPanel({
                                                 <DebouncedInput
                                                     value={segment.text}
                                                     onChange={(val) => updateSegment(index, { text: val })}
-                                                    className="flex-1 min-w-0 bg-transparent py-1 text-sm font-medium text-gray-700 focus:outline-none focus:text-purple-600 truncate"
+                                                    className="flex-1 min-w-0 bg-transparent py-1 text-sm font-medium text-gray-200 focus:outline-none focus:text-purple-400 placeholder-gray-600"
                                                     maxLength={30}
                                                 />
 
                                                 {/* Delete Button */}
                                                 <button
                                                     onClick={() => removeSegment(index)}
-                                                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shrink-0"
+                                                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                                     aria-label="Remove segment"
                                                 >
                                                     <Trash2 size={14} />
@@ -333,53 +331,63 @@ export default function ControlPanel({
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-6 px-4 pt-2">
                         {/* Theme Selector - Wrapped for contrast */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                Wheel Theme
+                            <label className="block text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">
+                                Visual Theme
                             </label>
-                            <div className="bg-slate-900 p-4 rounded-xl shadow-inner">
+                            <div className="bg-black/40 p-1 rounded-2xl border border-white/5 backdrop-blur-md">
                                 <ThemeSelector themes={themes} />
                             </div>
                         </div>
 
                         {/* Game Options */}
-                        <div className="space-y-4">
-                            <label className="block text-sm font-semibold text-gray-700">
-                                Game Options
+                        <div className="space-y-3">
+                            <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">
+                                Mechanics
                             </label>
 
-                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl">🔥</span>
+                            <label className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl cursor-pointer transition-all border border-white/5 hover:border-white/10 group">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500 group-hover:scale-110 transition-transform">
+                                        <span className="text-xl">🔥</span>
+                                    </div>
                                     <div>
-                                        <div className="font-semibold text-gray-900">Elimination Mode</div>
-                                        <div className="text-sm text-gray-500">Remove winner after spin</div>
+                                        <div className="font-semibold text-gray-200">Elimination Mode</div>
+                                        <div className="text-xs text-gray-500">Remove winner after spin</div>
                                     </div>
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    checked={eliminationMode}
-                                    onChange={toggleEliminationMode}
-                                    className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-purple-500 before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-6 before:shadow-md"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={eliminationMode}
+                                        onChange={toggleEliminationMode}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                                </div>
                             </label>
 
-                            <label className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-all border border-gray-100">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl">🔊</span>
+                            <label className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl cursor-pointer transition-all border border-white/5 hover:border-white/10 group">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-500 group-hover:scale-110 transition-transform">
+                                        <span className="text-xl">🔊</span>
+                                    </div>
                                     <div>
-                                        <div className="font-semibold text-gray-900">Sound Effects</div>
-                                        <div className="text-sm text-gray-500">Enable spin sounds</div>
+                                        <div className="font-semibold text-gray-200">Sound Effects</div>
+                                        <div className="text-xs text-gray-500">Immersive audio feedback</div>
                                     </div>
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    checked={soundEnabled}
-                                    onChange={toggleSound}
-                                    className="w-12 h-6 appearance-none bg-gray-300 rounded-full relative cursor-pointer transition-colors checked:bg-purple-500 before:content-[''] before:absolute before:w-5 before:h-5 before:rounded-full before:bg-white before:top-0.5 before:left-0.5 before:transition-transform checked:before:translate-x-6 before:shadow-md"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={soundEnabled}
+                                        onChange={toggleSound}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                                </div>
                             </label>
                         </div>
                     </div>

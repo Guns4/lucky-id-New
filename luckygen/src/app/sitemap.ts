@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://luckygen.click';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luckygen.click';
 const LANGUAGES = ['en', 'id', 'es', 'pt', 'hi'];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

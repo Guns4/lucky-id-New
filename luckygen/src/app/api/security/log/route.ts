@@ -34,8 +34,7 @@ export async function POST(request: NextRequest) {
         const supabase = await createClient();
 
         // Get client information
-        const ip = request.ip ||
-            request.headers.get('x-forwarded-for')?.split(',')[0] ||
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
             request.headers.get('x-real-ip') ||
             'unknown';
 
@@ -78,7 +77,7 @@ export async function POST(request: NextRequest) {
             data_breach_attempt: 'critical',
         };
 
-        const severity = severityMap[event_type];
+        const severity = severityMap[event_type as SecurityEventType];
 
         // Create security log
         const securityLog: SecurityLog = {

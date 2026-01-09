@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
 import Script from "next/script";
+import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManager";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -30,10 +31,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head />
+      <head>
+        {/* Google Tag Manager */}
+        <GoogleTagManager gtmId="GTM-T9M5VNTT" />
+      </head>
       <body
         className={`${poppins.variable} ${inter.variable} antialiased`}
       >
+        {/* Google Tag Manager (noscript) */}
+        <GoogleTagManagerNoScript gtmId="GTM-T9M5VNTT" />
+
         {children}
 
         {/* Google AdSense - Loaded after page becomes interactive */}

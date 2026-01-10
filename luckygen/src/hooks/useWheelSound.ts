@@ -163,8 +163,8 @@ export function useWheelSound() {
 
         try {
             const audio = spinAudioRef.current;
-            const fadeDuration = 300; // 300ms fade out
-            const fadeSteps = 20;
+            const fadeDuration = 600; // 600ms fade out - Longer for dramatic effect
+            const fadeSteps = 30; // More steps for ultra-smooth fade
             const stepTime = fadeDuration / fadeSteps;
             const volumeStep = audio.volume / fadeSteps;
 
@@ -186,7 +186,6 @@ export function useWheelSound() {
                     audio.volume = Math.max(0, audio.volume - volumeStep);
                 }
             }, stepTime);
-
         } catch (error) {
             console.warn('Failed to stop spin sound:', error);
         }

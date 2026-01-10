@@ -71,29 +71,29 @@ const Wheel = memo(({
         const winnerIndex = calculateWinner(segments.length);
         const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
 
-        // Professional spin configuration
-        const fullSpins = 8 + Math.floor(Math.random() * 3); // 8-10 full spins for excitement
+        // Professional spin configuration - EXTENDED FOR MAXIMUM SUSPENSE
+        const fullSpins = 12 + Math.floor(Math.random() * 5); // 12-16 full spins for dramatic build-up
         const totalDegree = 360 * fullSpins + targetRotation;
-        const spinDuration = 4.5; // Increased to 4.5s for more professional feel
+        const spinDuration = 7.5; // ⏱️ 7.5 seconds - Perfect for building anticipation!
 
         try {
             // 🎵 Start the background music IMMEDIATELY when spin starts
             playSpinLoop();
 
-            // 🎡 Animate the wheel with professional easing
+            // 🎡 Animate the wheel with professional easing - SLOW and DRAMATIC
             await controls.start({
                 rotate: totalDegree,
                 transition: {
                     duration: spinDuration,
-                    ease: [0.32, 0.72, 0.0, 1.0], // Custom cubic-bezier for smooth deceleration
+                    ease: [0.25, 0.46, 0.45, 0.94], // Slower deceleration for more suspense
                 }
             });
 
-            // ⏹️ EXACTLY when spin stops - stop the music immediately
+            // ⏹️ EXACTLY when spin stops - stop the music with fade-out
             stopSpinLoop();
 
-            // ⏱️ Small dramatic pause (200ms) for professional effect
-            await new Promise(resolve => setTimeout(resolve, 200));
+            // ⏱️ DRAMATIC PAUSE (500ms) - Build maximum tension before reveal!
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             // 🏆 Get the winner - THIS MUST MATCH THE FINAL POSITION
             const winningText = segments[winnerIndex].text;

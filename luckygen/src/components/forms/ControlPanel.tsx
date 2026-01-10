@@ -158,9 +158,9 @@ export default function ControlPanel({
                 <div className="flex items-center gap-4 mb-6">
                     <div className="relative w-12 h-12 transition-transform duration-300 hover:scale-105 ring-2 ring-purple-500/50 rounded-full">
                         <img
-                            src="/ageinfo-logo.png"
-                            alt="Wheel Editor Logo"
-                            className="w-full h-full object-cover rounded-full"
+                            src="/icon-192x192.png"
+                            alt="LuckyGen Wheel Editor"
+                            className="w-full h-full object-contain rounded-full"
                         />
                     </div>
                     <div>

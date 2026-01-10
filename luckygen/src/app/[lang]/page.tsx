@@ -102,9 +102,9 @@ export default function LandingPage() {
                                 <div className="flex items-center gap-3">
                                     <div className="relative w-8 h-8">
                                         <img
-                                            src="/ageinfo-logo.png"
-                                            alt="LuckyGen"
-                                            className="w-full h-full object-cover rounded-full ring-2 ring-purple-500/50"
+                                            src="/icon-192x192.png"
+                                            alt="LuckyGen Logo"
+                                            className="w-full h-full object-contain rounded-full ring-2 ring-purple-500/50"
                                         />
                                     </div>
                                     <span className="font-bold text-lg text-white tracking-tight">LuckyGen</span>

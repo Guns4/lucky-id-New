@@ -34,6 +34,14 @@ export default function RootLayout({
       <head>
         {/* Google Tag Manager */}
         <GoogleTagManager gtmId="GTM-T9M5VNTT" />
+
+        {/* Google AdSense - Required in head section */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099892029462046"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
       </head>
       <body
         className={`${poppins.variable} ${inter.variable} antialiased`}
@@ -42,14 +50,6 @@ export default function RootLayout({
         <GoogleTagManagerNoScript gtmId="GTM-T9M5VNTT" />
 
         {children}
-
-        {/* Google AdSense - Loaded after page becomes interactive */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099892029462046"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );

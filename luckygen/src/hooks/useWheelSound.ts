@@ -137,10 +137,12 @@ export function useWheelSound() {
         if (!soundEnabled || !spinAudioRef.current) return;
 
         try {
-            spinAudioRef.current.currentTime = 0;
-            spinAudioRef.current.loop = true;
+            const audio = spinAudioRef.current;
+            audio.currentTime = 0;
+            audio.loop = true;
+            audio.volume = 0.4; // Reset to full volume
 
-            const playPromise = spinAudioRef.current.play();
+            const playPromise = audio.play();
 
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
@@ -153,15 +155,38 @@ export function useWheelSound() {
     }, [soundEnabled]);
 
     /**
-     * Stop continuous spin sound
+     * Stop continuous spin sound with smooth fade-out
+     * Professional audio transition
      */
     const stopSpinLoop = useCallback(() => {
         if (!spinAudioRef.current) return;
 
         try {
-            spinAudioRef.current.pause();
-            spinAudioRef.current.currentTime = 0;
-            spinAudioRef.current.loop = false;
+            const audio = spinAudioRef.current;
+            const fadeDuration = 300; // 300ms fade out
+            const fadeSteps = 20;
+            const stepTime = fadeDuration / fadeSteps;
+            const volumeStep = audio.volume / fadeSteps;
+
+            let currentStep = 0;
+
+            // Smooth fade-out effect
+            const fadeInterval = setInterval(() => {
+                currentStep++;
+
+                if (currentStep >= fadeSteps || audio.volume <= 0.05) {
+                    // Completely stop the audio
+                    clearInterval(fadeInterval);
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.loop = false;
+                    audio.volume = 0.4; // Reset volume for next play
+                } else {
+                    // Gradually decrease volume
+                    audio.volume = Math.max(0, audio.volume - volumeStep);
+                }
+            }, stepTime);
+
         } catch (error) {
             console.warn('Failed to stop spin sound:', error);
         }

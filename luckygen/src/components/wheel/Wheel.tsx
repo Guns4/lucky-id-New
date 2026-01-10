@@ -46,7 +46,7 @@ const Wheel = memo(({
     const [embedModalOpen, setEmbedModalOpen] = useState(false);
 
     // Audio Hook
-    const { playTick, playWin, enabled: soundEnabled, toggleSound } = useWheelSound();
+    const { playTick, playWin, playSpinLoop, stopSpinLoop, enabled: soundEnabled, toggleSound } = useWheelSound();
 
     // Animation Controls
     const rotation = useMotionValue(0);
@@ -61,33 +61,57 @@ const Wheel = memo(({
     const segmentCount = segments.length || 1;
     const segmentAngle = 360 / segmentCount;
 
-    // Optimized Spin Logic
+    // Professional Spin Logic with Perfect Synchronization
     const performSpin = async () => {
         if (isSpinning || segments.length === 0) return;
         setIsSpinning(true);
         setWinner(null);
 
+        // Calculate winner index BEFORE starting
         const winnerIndex = calculateWinner(segments.length);
         const targetRotation = getRotationForWinner(winnerIndex, segments.length) - segmentAngle;
 
-        // Faster spin: More rotations in less time
-        const fullSpins = 8 + Math.floor(Math.random() * 3); // 8-10 full spins
+        // Professional spin configuration
+        const fullSpins = 8 + Math.floor(Math.random() * 3); // 8-10 full spins for excitement
         const totalDegree = 360 * fullSpins + targetRotation;
+        const spinDuration = 4.5; // Increased to 4.5s for more professional feel
 
-        await controls.start({
-            rotate: totalDegree,
-            transition: {
-                duration: 3.5, // Reduced from 5s for snappier feel
-                ease: "circOut",
-            }
-        });
+        try {
+            // 🎵 Start the background music IMMEDIATELY when spin starts
+            playSpinLoop();
 
-        const winningText = segments[winnerIndex].text;
-        setWinner(winningText);
-        playWin();
-        triggerConfetti(isUltimateWinner);
-        onSpinComplete?.(winningText);
-        setIsSpinning(false);
+            // 🎡 Animate the wheel with professional easing
+            await controls.start({
+                rotate: totalDegree,
+                transition: {
+                    duration: spinDuration,
+                    ease: [0.32, 0.72, 0.0, 1.0], // Custom cubic-bezier for smooth deceleration
+                }
+            });
+
+            // ⏹️ EXACTLY when spin stops - stop the music immediately
+            stopSpinLoop();
+
+            // ⏱️ Small dramatic pause (200ms) for professional effect
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            // 🏆 Get the winner - THIS MUST MATCH THE FINAL POSITION
+            const winningText = segments[winnerIndex].text;
+
+            // 📢 Show winner notification FIRST (synchronously)
+            setWinner(winningText);
+
+            // 🎉 Then trigger all celebration effects together
+            playWin();
+            triggerConfetti(isUltimateWinner);
+            onSpinComplete?.(winningText);
+
+        } catch (error) {
+            console.error('Spin error:', error);
+            stopSpinLoop(); // Ensure music stops even on error
+        } finally {
+            setIsSpinning(false);
+        }
     };
 
     // Ticking Sound Effect Listener
@@ -322,30 +346,74 @@ const Wheel = memo(({
                 </button>
             </div>
 
-            {/* Winner Display Modal */}
+            {/* Winner Display Modal - Professional Animation */}
             {winner && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop with blur effect */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.5, y: 50 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border-4 border-yellow-400"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+                    />
+
+                    {/* Winner Card */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.3, rotateX: 90 }}
+                        animate={{
+                            opacity: 1,
+                            scale: 1,
+                            rotateX: 0,
+                        }}
+                        transition={{
+                            type: "spring",
+                            duration: 0.6,
+                            bounce: 0.4,
+                        }}
+                        className="relative bg-gradient-to-br from-white to-yellow-50 rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center border-4 border-yellow-400"
+                        style={{ transformStyle: 'preserve-3d' }}
                     >
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">🎉 We have a winner!</h3>
-                        <div className="bg-yellow-50 p-4 rounded-xl mb-6">
-                            <p className="text-4xl font-black text-yellow-600 break-words">{winner}</p>
-                        </div>
+                        {/* Celebration Header */}
+                        <motion.h3
+                            initial={{ y: -20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-3xl font-black text-gray-800 mb-4"
+                        >
+                            🎉 Pemenangnya adalah!
+                        </motion.h3>
 
-                        {/* Social Sharing */}
-                        <div className="flex gap-2 justify-center mb-4">
-                            <button className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200">
-                                <Share2 size={20} />
-                            </button>
-                            <button className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
-                                <Copy size={20} />
-                            </button>
-                        </div>
+                        {/* Winner Name Box */}
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.3, type: "spring", bounce: 0.5 }}
+                            className="bg-gradient-to-br from-yellow-400 to-orange-500 p-6 rounded-2xl mb-6 shadow-lg"
+                        >
+                            <p className="text-5xl font-black text-white break-words drop-shadow-lg">
+                                {winner}
+                            </p>
+                        </motion.div>
 
-                        <button
+                        {/* Social Sharing Buttons */}
+                        <motion.div
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="flex gap-3 justify-center mb-6"
+                        >
+                            <button className="p-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-all hover:scale-110 shadow-md">
+                                <Share2 size={22} />
+                            </button>
+                            <button className="p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all hover:scale-110 shadow-md">
+                                <Copy size={22} />
+                            </button>
+                        </motion.div>
+
+                        {/* Close/Continue Button */}
+                        <motion.button
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.5 }}
                             onClick={() => {
                                 setWinner(null);
                                 if (eliminationMode && onEliminate) onEliminate(winner);
@@ -353,7 +421,7 @@ const Wheel = memo(({
                             className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
                         >
                             {eliminationMode ? 'Eliminate & Continue' : 'Close'}
-                        </button>
+                        </motion.button>
                     </motion.div>
                 </div>
             )}

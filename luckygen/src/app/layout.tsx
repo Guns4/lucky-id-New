@@ -32,18 +32,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense Meta Tag - Required for verification */}
+        {/* Performance Optimization: Preconnect to external domains */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+
+        {/* Google AdSense Meta Tag */}
         <meta name="google-adsense-account" content="ca-pub-5099892029462046" />
 
         {/* Google Tag Manager */}
         <GoogleTagManager gtmId="GTM-T9M5VNTT" />
 
-        {/* Google AdSense Script - Required in head section */}
+        {/* Google AdSense Script - Optimized Loading */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099892029462046"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
       </head>
       <body

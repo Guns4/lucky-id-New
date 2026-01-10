@@ -32,10 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Google AdSense Meta Tag - Required for verification */}
+        <meta name="google-adsense-account" content="ca-pub-5099892029462046" />
+
         {/* Google Tag Manager */}
         <GoogleTagManager gtmId="GTM-T9M5VNTT" />
 
-        {/* Google AdSense - Required in head section */}
+        {/* Google AdSense Script - Required in head section */}
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5099892029462046"

@@ -16,8 +16,6 @@ export function getRotationForWinner(winnerIndex: number, segmentCount: number):
     const winnerMiddleAngle = winnerIndex * segmentAngle + segmentAngle / 2;
 
     // To position winner at top, we need to rotate by (360 - winnerMiddleAngle)
-    // Add small random offset within segment for natural feel
-    const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.5;
-
-    return (360 - winnerMiddleAngle + randomOffset) % 360;
+    // NO random offset - ensures perfect alignment between visual and logic
+    return (360 - winnerMiddleAngle) % 360;
 }

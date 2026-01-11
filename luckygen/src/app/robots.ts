@@ -1,14 +1,30 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next'
 
+/**
+ * Robots.txt Configuration for LuckyGen
+ * Controls search engine crawler access
+ * 
+ * Next.js automatically serves this at /robots.txt
+ */
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: [
             {
                 userAgent: '*',
                 allow: '/',
-                disallow: ['/api/', '/_next/'],
+                // Disallow admin routes if you add them later:
+                // disallow: '/admin/',
+
+                // Disallow API routes from indexing (if applicable):
+                // disallow: '/api/',
             },
+            // You can add specific rules for different bots:
+            // {
+            //   userAgent: 'Googlebot',
+            //   allow: '/',
+            //   crawlDelay: 0,
+            // },
         ],
-        sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.luckygen.click'}/sitemap.xml`,
-    };
+        sitemap: 'https://luckygen.click/sitemap.xml',
+    }
 }

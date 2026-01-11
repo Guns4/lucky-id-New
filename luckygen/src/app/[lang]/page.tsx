@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Wheel from '@/components/wheel/Wheel';
+import Image from 'next/image';
+import WheelClient from '@/components/wheel/WheelClient'; // Dynamic import with ssr:false
 import ControlPanel from '@/components/forms/ControlPanel';
 import InContentAd from '@/components/ads/InContentAd';
 import AdUnit, { TopLeaderboardAd, MediumRectangleAd } from '@/components/ads/AdUnit';
@@ -101,10 +102,13 @@ export default function LandingPage() {
                             <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="relative w-8 h-8">
-                                        <img
+                                        <Image
                                             src="/icon-192x192.png"
                                             alt="LuckyGen Logo"
+                                            width={32}
+                                            height={32}
                                             className="w-full h-full object-contain rounded-full ring-2 ring-purple-500/50"
+                                            priority
                                         />
                                     </div>
                                     <span className="font-bold text-lg text-white tracking-tight">LuckyGen</span>
@@ -137,12 +141,12 @@ export default function LandingPage() {
                                 </button>
                             </div>
 
-                            {/* Wheel Component */}
+                            {/* Wheel Component - Client Side Only */}
                             <div className="relative z-10 scale-90 lg:scale-100 transition-transform">
                                 {/* Glow Effect behind wheel */}
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-violet-500/20 blur-[100px] rounded-full pointer-events-none"></div>
 
-                                <Wheel
+                                <WheelClient
                                     segments={themedSegments}
                                     theme={theme}
                                     themeConfig={currentThemeConfig}

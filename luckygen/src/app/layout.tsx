@@ -18,9 +18,74 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LuckyGen - Random Wheel Spinner & Decision Maker",
-  description: "Free online spinning wheel for making random decisions. Create custom wheels, spin to decide, and share with friends!",
+  // ===== BASIC SEO =====
+  title: "LuckyGen - Professional Random Wheel & Raffle Generator",
+  description: "The ultimate random wheel spinner for giveaways, business raffles, and classroom decisions. Fair, customizable, and certified random results. Perfect for marketers, educators, and event organizers.",
+  keywords: [
+    "random picker",
+    "wheel spin",
+    "raffle generator",
+    "giveaway tool",
+    "business decision maker",
+    "online randomizer",
+    "educational tools",
+    "fair raffle",
+    "RNG certified",
+    "prize wheel",
+    "name picker",
+    "team building tool",
+    "classroom selector",
+    "marketing giveaway",
+    "social media contest",
+  ],
+
+  // ===== OPEN GRAPH (Facebook, LinkedIn, Slack) =====
+  openGraph: {
+    title: "LuckyGen - Spin the Wheel Tool",
+    description: "Pick winners fairly for your contests and events with LuckyGen. Professional random wheel generator for giveaways, raffles, and business decisions.",
+    type: "website",
+    url: "https://luckygen.click/",
+    siteName: "LuckyGen",
+    locale: "en_US",
+    images: [
+      {
+        url: "https://luckygen.click/og-image.png", // TODO: Create 1200x630 image
+        width: 1200,
+        height: 630,
+        alt: "LuckyGen Random Wheel Spinner - Fair Raffle Generator",
+        type: "image/png",
+      },
+    ],
+  },
+
+  // ===== TWITTER CARD =====
+  twitter: {
+    card: "summary_large_image",
+    title: "LuckyGen - Professional Random Wheel",
+    description: "Fair random wheel spinner for giveaways, raffles, and business decisions. Certified RNG technology.",
+    images: ["https://luckygen.click/twitter-image.png"], // TODO: Create 1200x675 image
+  },
+
+  // ===== ROBOTS & INDEXING =====
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  // ===== ADDITIONAL META =====
+  authors: [{ name: "LuckyGen Team" }],
+  creator: "LuckyGen",
+  publisher: "LuckyGen",
   metadataBase: new URL('https://luckygen.click'),
+
+  // ===== ADSENSE =====
   other: {
     "google-adsense-account": "ca-pub-5099892029462046"
   }

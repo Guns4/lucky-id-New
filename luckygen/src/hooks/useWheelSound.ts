@@ -22,18 +22,36 @@ export function useWheelSound() {
         winAudioRef.current = new Audio('/sounds/win.mp3');
         spinAudioRef.current = new Audio('/sounds/spin.mp3');
 
-        // Preload audio files
+        // Preload audio files with explicit load call for instant playback
         tickAudioRef.current.preload = 'auto';
         winAudioRef.current.preload = 'auto';
         spinAudioRef.current.preload = 'auto';
+
+        // Force immediate loading to eliminate any playback delay
+        tickAudioRef.current.load();
+        winAudioRef.current.load();
+        spinAudioRef.current.load();
 
         // Set volumes
         tickAudioRef.current.volume = 0.3;
         winAudioRef.current.volume = 0.5;
         spinAudioRef.current.volume = 0.4;
 
+        // Add load event listeners to ensure audio is ready
+        const handleLoadError = (audioName: string) => (error: Event) => {
+            console.warn(`Failed to load ${audioName} audio:`, error);
+        };
+
+        tickAudioRef.current.addEventListener('error', handleLoadError('tick'));
+        winAudioRef.current.addEventListener('error', handleLoadError('win'));
+        spinAudioRef.current.addEventListener('error', handleLoadError('spin'));
+
         // Cleanup
         return () => {
+            tickAudioRef.current?.removeEventListener('error', handleLoadError('tick'));
+            winAudioRef.current?.removeEventListener('error', handleLoadError('win'));
+            spinAudioRef.current?.removeEventListener('error', handleLoadError('spin'));
+
             tickAudioRef.current = null;
             winAudioRef.current = null;
             spinAudioRef.current = null;

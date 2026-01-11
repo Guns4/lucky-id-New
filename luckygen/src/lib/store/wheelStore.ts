@@ -8,6 +8,12 @@ export interface WheelSegment {
     color: string;
 }
 
+export interface SpinHistoryEntry {
+    id: string;
+    prizeName: string;
+    timestamp: number; // Unix timestamp in milliseconds
+}
+
 interface WheelStore {
     segments: WheelSegment[];
     title: string;
@@ -24,6 +30,10 @@ interface WheelStore {
     eliminateSegment: (text: string) => void;
     soundEnabled: boolean;
     toggleSound: () => void;
+    // Spin history
+    spinHistory: SpinHistoryEntry[];
+    addToHistory: (prizeName: string) => void;
+    clearHistory: () => void;
 }
 
 export const useWheelStore = create<WheelStore>()(
@@ -34,6 +44,7 @@ export const useWheelStore = create<WheelStore>()(
             theme: 'default',
             eliminationMode: false,
             soundEnabled: true,
+            spinHistory: [], // Initialize empty history
 
             setTitle: (title) => set({ title }),
 
@@ -67,6 +78,24 @@ export const useWheelStore = create<WheelStore>()(
                 })),
 
             toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+
+            // Add spin result to history
+            addToHistory: (prizeName) =>
+                set((state) => {
+                    const newEntry: SpinHistoryEntry = {
+                        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        prizeName,
+                        timestamp: Date.now(),
+                    };
+
+                    // Add to beginning and keep only last 10
+                    const updatedHistory = [newEntry, ...state.spinHistory].slice(0, 10);
+
+                    return { spinHistory: updatedHistory };
+                }),
+
+            // Clear all history
+            clearHistory: () => set({ spinHistory: [] }),
         }),
         {
             name: 'luckygen-wheel-storage',
